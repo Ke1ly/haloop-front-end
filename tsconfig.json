@@ -19,11 +19,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src/*",
-    "src/pages/account.ts",
-    "src/pages/nav.ts",
-    "src/pages/works.ts",
-    "src/utils/dom-utils.ts"
-  ]
+  "include": ["src/*"]
 }
