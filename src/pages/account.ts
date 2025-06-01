@@ -1,9 +1,10 @@
 import { getElementById } from "../utils/dom-utils.js";
 import type { WorkPost } from "../types/Work.js";
+const API_BASE_URL = "haloopback-production.up.railway.app";
 
 //用 token 取得當前使用者資訊
 async function getCurrentUser() {
-  const res = await fetch("/api/auth/me", {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -191,7 +192,7 @@ function initHostProfile() {
       });
       console.log("02前端準備上傳的img檔案", uploadData.getAll("images"));
 
-      const uploadResponse = await fetch("/api/uploads", {
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
         method: "POST",
         body: uploadData,
       });
@@ -226,7 +227,7 @@ function initHostProfile() {
     console.log("01前端準備上傳的postData", postData);
 
     // 將資料存至/works
-    let WorkPostResponse = await fetch("/api/works", {
+    let WorkPostResponse = await fetch(`${API_BASE_URL}/api/works`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -251,7 +252,7 @@ async function initUserProfile(userData: any) {
   username.value = userData.user.username;
   realname.value = userData.user.realname;
   email.value = userData.user.email;
-  const response = await fetch("/api/profile/host", {
+  const response = await fetch(`${API_BASE_URL}/api/profile/host`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -313,7 +314,7 @@ async function initUserProfile(userData: any) {
       city: getSelectedCity(),
     };
     console.log("01前端送出Data", data);
-    const profileResponse = await fetch("/api/profile/host", {
+    const profileResponse = await fetch(`${API_BASE_URL}/api/profile/host`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

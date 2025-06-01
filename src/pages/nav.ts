@@ -1,5 +1,6 @@
 import { getElementById } from "../utils/dom-utils.js";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
+const API_BASE_URL = "haloopback-production.up.railway.app";
 
 function initAuthUI() {
   // 角色按鈕樣式
@@ -79,7 +80,7 @@ function initAuthUI() {
       }
 
       // fetch 後端，寫入註冊資料
-      let response = await fetch("/api/auth/register", {
+      let response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ function initAuthUI() {
       }
 
       // fetch 後端，寫入登入資料
-      let response = await fetch("/api/auth/login", {
+      let response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -203,7 +204,7 @@ function loginUI() {
 
 //用 token 取得當前使用者資訊
 async function getCurrentUser() {
-  const res = await fetch("/api/auth/me", {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },

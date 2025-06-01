@@ -7,6 +7,7 @@ import type {
 import Litepicker from "litepicker";
 import "litepicker/dist/css/litepicker.css";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
+const API_BASE_URL = "haloopback-production.up.railway.app";
 
 //獲得要呈現在頁面上的所有貼文資料
 async function getWorkPosts(
@@ -14,7 +15,7 @@ async function getWorkPosts(
 ): Promise<WorkPostForCardRender[]> {
   let workPostsData: WorkPostForCardRender[];
   if (!filter) {
-    const response = await fetch("/api/works", {
+    const response = await fetch(`${API_BASE_URL}/api/works`, {
       method: "GET",
     });
     if (!response.ok) throw new Error("Failed to fetch work posts");
@@ -24,7 +25,7 @@ async function getWorkPosts(
     const queryString = toQueryString(filter);
     console.log(queryString);
 
-    const response = await fetch(`/api/works?${queryString}`);
+    const response = await fetch(`${API_BASE_URL}/api/works?${queryString}`);
     if (!response.ok) throw new Error("Failed to fetch work posts");
     const data = await response.json();
     workPostsData = data.workPostData;
@@ -267,7 +268,7 @@ function initFilter() {
 initFilter();
 
 async function getCurrentUser() {
-  const res = await fetch("/api/auth/me", {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -339,7 +340,7 @@ async function initSubscription() {
     console.log("01前端準備送出訂閱資料filter", filter);
 
     //將資料存入後端
-    let filterSubscribeResponse = await fetch("/api/subscribe", {
+    let filterSubscribeResponse = await fetch(`${API_BASE_URL}/api/subscribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -467,7 +468,7 @@ const picker = new Litepicker({
 });
 
 async function test() {
-  const response = await fetch("api/subscribe", {
+  const response = await fetch(`${API_BASE_URL}api/subscribe`, {
     method: "GET",
   });
 
