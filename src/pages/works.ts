@@ -7,7 +7,7 @@ import type {
 import Litepicker from "litepicker";
 import "litepicker/dist/css/litepicker.css";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
-const API_BASE_URL = "haloopback-production.up.railway.app";
+const API_BASE_URL = "https://haloopback-production.up.railway.app";
 
 //獲得要呈現在頁面上的所有貼文資料
 async function getWorkPosts(

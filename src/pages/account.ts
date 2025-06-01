@@ -1,6 +1,6 @@
 import { getElementById } from "../utils/dom-utils.js";
 import type { WorkPost } from "../types/Work.js";
-const API_BASE_URL = "haloopback-production.up.railway.app";
+const API_BASE_URL = "https://haloopback-production.up.railway.app";
 
 //用 token 取得當前使用者資訊
 async function getCurrentUser() {

@@ -1,6 +1,6 @@
 import { getElementById } from "../utils/dom-utils.js";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
-const API_BASE_URL = "haloopback-production.up.railway.app";
+const API_BASE_URL = "https://haloopback-production.up.railway.app";
 
 function initAuthUI() {
   // 角色按鈕樣式
