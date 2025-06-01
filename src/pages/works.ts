@@ -237,6 +237,8 @@ function initFilter() {
     workListSection.replaceChildren();
     renderWorkPosts(postsData);
     renderSlides();
+    filterDialog.close();
+    filterDialog.classList.remove("show");
   });
 
   // ＝＝＝＝＝＝＝＝＝＝＝＝點擊搜尋＝＝＝＝＝＝＝＝＝＝＝＝
