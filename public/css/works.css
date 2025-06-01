@@ -70,12 +70,12 @@ body > main {
 body > main > section#map {
   flex-basis: 200px;
   flex-grow: 1;
-  border: 1px solid black;
+  /* border: 1px solid black; */
 }
 body > main > section#work-list {
   flex-basis: 500px;
   flex-grow: 1;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   padding: 0px 20px;
   padding-bottom: 20px;
 }
