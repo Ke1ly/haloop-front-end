@@ -468,7 +468,7 @@ const picker = new Litepicker({
 });
 
 async function test() {
-  const response = await fetch(`${API_BASE_URL}api/subscribe`, {
+  const response = await fetch(`${API_BASE_URL}/api/subscribe`, {
     method: "GET",
   });
 
