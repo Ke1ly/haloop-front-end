@@ -2,7 +2,6 @@ export function createDialogClickHandler(
   dialogElement: HTMLDialogElement
 ): (event: MouseEvent) => void {
   return function handleDialogClick(event: MouseEvent): void {
-    // const target = event.target as HTMLElement;
     const rect = dialogElement.getBoundingClientRect();
 
     // 檢查點擊是否在元素外部
@@ -12,8 +11,7 @@ export function createDialogClickHandler(
       event.clientY < rect.top ||
       event.clientY > rect.bottom;
 
-    // 開發模式下的除錯資訊
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.VITE_MODE === "development") {
       console.log(`
           點擊座標: (${event.clientX}, ${event.clientY})
           對話框邊界: 

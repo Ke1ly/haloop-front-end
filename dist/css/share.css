@@ -1,22 +1,33 @@
-:root {
-  --primary-text-color: #000000;
-  --secondary-text-color: #9a9a9a;
-  --light-background-color: #ffffff;
-  --dark-background-color: #616161;
-  --primary-button-color: rgb(235, 235, 235);
-  /* --primary-button-border: rgb(0, 0, 0); */
+@font-face {
+  font-family: "NotoSans";
+  src: url(/font/NotoSansTC-VariableFont_wght.ttf);
 }
+
+@font-face {
+  font-family: "SweiSpring";
+  src: url(/font/SweiSpringCJKtc-Medium.ttf);
+}
+
 * {
-  font-weight: normal;
+  font-family: "NotoSans";
+  line-height: 1.4;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: rgb(238, 235, 233);
 }
 body > header {
-  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.05);
   padding: 15px 0px;
+  position: sticky;
+  top: 0px;
+  z-index: 11;
+  background-color: rgb(238, 235, 233);
+  height: 70px;
+  transition: all 0.3s ease-in-out;
 }
 body > header > div {
-  /* border: 1px solid rebeccapurple; */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -30,29 +41,27 @@ body > header > div > div.left {
     color: black;
     font-weight: 700;
     margin-left: 10px;
+    font-size: 18px;
   }
 }
 body > header > div > div.right {
-  /* border: 1px solid rebeccapurple; */
+  z-index: 35;
   display: flex;
   flex-direction: row;
-  /* justify-content: center; */
   align-items: center;
   i.fa-bell {
     cursor: pointer;
-    margin-right: 10px;
   }
   div#notification-count {
     position: relative;
     top: -15px;
-    left: -15px;
+    left: -7px;
     padding: 5px 5px;
     border-radius: 50%;
-    width: 10px;
-    height: 10px;
+    width: 15px;
+    height: 15px;
     font-size: 10px;
-    text-align: center;
-    line-height: 10px;
+    line-height: 5px;
     background-color: #950000;
     color: #eaeaea;
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
@@ -61,28 +70,39 @@ body > header > div > div.right {
     position: relative;
     top: 20px;
     left: -50px;
-    /* border: 1px solid firebrick; */
     padding: 3px 3px;
+    z-index: 30;
     div#visitor-menu,
     div#helper-menu,
     div#host-menu {
       position: absolute;
       top: 10px;
-      left: -10px;
-      padding: 0px 20px;
-      padding-top: 15px;
-      padding-bottom: 5px;
+      left: -50px;
+      padding: 15px 15px;
       border-radius: 10px;
-      width: 100px;
+      width: 150px;
       background-color: #ffffff;
       box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+
       hr {
-        margin-bottom: 10px;
+        border: none;
+        height: 1px;
+        background-color: rgb(180, 180, 180);
+        margin: 8px 5px;
       }
       div {
-        padding-bottom: 10px;
+        padding: 10px 10px;
         text-align: left;
         cursor: pointer;
+        border-radius: 10px;
+
+        &:hover {
+          background-color: #f3f3f3;
+        }
+      }
+      a {
+        text-decoration: none;
+        color: #000000;
       }
       display: none;
     }
@@ -93,22 +113,26 @@ body > header > div > div.right {
       left: -150px;
       padding: 15px 20px;
       border-radius: 10px;
-      width: 150px;
+      width: 200px;
       background-color: #ffffff;
       box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
       display: none;
+      z-index: 35;
     }
   }
-  button {
+  button#show-menu-btn {
     border: none;
     background: none;
-    padding: 15px 15px;
-    background-color: var(--primary-button-color);
+    padding: 10px 15px;
     border-radius: 30px;
-    margin-right: 10px;
+    margin-right: 20px;
     cursor: pointer;
     i {
       margin: 0px 3px;
+      cursor: pointer;
+    }
+    &:hover {
+      box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
     }
   }
 }
@@ -140,9 +164,8 @@ dialog#sign-in-dialog {
     align-items: center;
     input {
       width: 250px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      margin-left: 5px;
+      margin-top: 10px;
+      margin-bottom: 5px;
       padding: 15px;
       border: 1px solid #cccccc;
       border-radius: 8px;
@@ -150,6 +173,9 @@ dialog#sign-in-dialog {
       &:focus {
         border: 1.5px solid #000000;
       }
+    }
+    label {
+      margin-top: 10px;
     }
     div#sign-up-role-div,
     div#sign-in-role-div {
@@ -176,7 +202,7 @@ dialog#sign-in-dialog {
       border: none;
       background: none;
       padding: 15px 15px;
-      background-color: var(--primary-button-color);
+      background-color: rgb(235, 235, 235);
       border-radius: 15px;
       cursor: pointer;
       margin: 10px 0px;

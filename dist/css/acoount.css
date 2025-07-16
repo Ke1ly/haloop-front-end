@@ -97,12 +97,10 @@ body > main > section#user-profile-section {
       }
     }
   }
-  /* border: 3px solid darkblue; */
 }
 
 body > main > section#helper-profile-section {
   display: none;
-  border: 3px solid darkblue;
 }
 
 body > main > section#host-profile-section {
@@ -146,13 +144,6 @@ body > main > section#host-profile-section {
       background-color: #eaeaea;
       border: 1px solid #000000;
     }
-    /* button.save-form-data {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 20px;
-      background-color: rgb(231, 231, 231);
-      cursor: pointer;
-    } */
   }
   div#post-work-btn-div {
     padding: 15px 5px;
@@ -180,7 +171,6 @@ body > main > section#host-profile-section > section#host-profile-top {
   margin-bottom: 20px;
   div#host-profile-top-wrap {
     position: relative;
-    /* border: 1px solid mediumaquamarine; */
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
     border-radius: 20px;
     padding: 0px 10px;
@@ -194,7 +184,6 @@ body > main > section#host-profile-section > section#host-profile-top {
         padding: 20px 20px;
         flex-basis: 200px;
         flex-grow: 1;
-        /* border: 1px solid rebeccapurple; */
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
@@ -239,7 +228,6 @@ body > main > section#host-profile-section > section#host-profile-bottom {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    /* border: 1px solid rebeccapurple; */
 
     div {
       margin-top: 5px;

@@ -1,25 +1,4 @@
-// export interface WorkPostInput {
-//   // unitName: string;
-//   // address: string;
-//   // unitDescription: string;
-//   startDate: string;
-//   endDate: string;
-//   recruitCount: number;
-//   imageUrls: string[];
-//   positionName: string;
-//   positionCategories: Option[];
-//   averageWorkHours: number;
-//   minDuration: number;
-//   requirements: Option[];
-//   positionDescription: string;
-//   accommodations: Option[];
-//   meals: Option[];
-//   experiences: Option[];
-//   environments: Option[];
-//   benefitsDescription: string;
-// }
-
-// WorkPost發文(post)
+// WorkPost發文 api/works/post
 export interface WorkPost {
   startDate: string;
   endDate: string;
@@ -37,63 +16,101 @@ export interface WorkPost {
   environments: string[];
   benefitsDescription: string;
 }
-export interface Image {
-  id: string;
-  imageUrl: string;
-}
-// WorkPost回應(get)
+
+// WorkPost取得 api/works/get
 export interface WorkPostForCardRender {
-  startDate: string;
-  endDate: string;
-  recruitCount: number;
-  images: Image[];
+  id: string;
+  images: string[];
   positionName: string;
-  positionCategories: Option[];
+  positionCategories: string[];
   averageWorkHours: number;
   minDuration: number;
-  requirements: Option[];
-  positionDescription: string;
-  accommodations: Option[];
-  meals: Option[];
-  experiences: Option[];
-  environments: Option[];
-  benefitsDescription: string;
-  unit: HostProfileResponse;
+  accommodations: string[];
+  meals: string[];
+  experiences: string[];
+  environments: string[];
+  unit: {
+    id: string;
+    city: string;
+    unitName: string;
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
 }
 
-// export interface WorkPostForFilter {
-//   startDate: string;
-//   endDate: string;
-//   recruitCount: number;
-//   positionCategories: Option[];
-//   averageWorkHours: number;
-//   minDuration: number;
-//   requirements: Option[];
-//   accommodations: Option[];
-//   meals: Option[];
-//   experiences: Option[];
-//   environments: Option[];
-// }
+export interface WorkPostForPageRender {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  recruitCount: number;
+  images: string[];
+  positionName: string;
+  positionDescription: string;
+  positionCategories: string[];
+  averageWorkHours: number;
+  minDuration: number;
+  accommodations: string[];
+  meals: string[];
+  experiences: string[];
+  environments: string[];
+  requirements: string[];
+  benefitsDescription: string;
+  unit: {
+    id: string;
+    userId: string;
+    city: string;
+    district?: string;
+    address: string;
+    unitName: string;
+    unitDescription?: string;
+    latitude: number;
+    longitude: number;
+    createdAt: Date;
+  };
+}
 
 export interface WorkPostForFilter {
-  unit: {
-    city: string;
-  };
+  id: string;
   startDate: Date;
   endDate: Date;
   recruitCount: number;
   averageWorkHours: number;
   minDuration: number;
-  positionCategories: Option[];
-  accommodations: Option[];
-  meals: Option[];
-  experiences: Option[];
-  environments: Option[];
+  experiences: string[];
+  environments: string[];
+  accommodations: string[];
+  meals: string[];
+  positionCategories: string[];
+  unit: {
+    city: string;
+  };
+  positionName: string;
+}
+// 計算recommendations的函式用 get /api/subscription/recommendations
+export interface WorkPostForRecommendation {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  recruitCount: number;
+  averageWorkHours: number;
+  minDuration: number;
+  experiences: string[];
+  environments: string[];
+  accommodations: string[];
+  meals: string[];
+  images: string[];
+  positionCategories: string[];
+  unit: {
+    city: string;
+    unitName: string;
+  };
+  positionName: string;
 }
 
-export interface Option {
-  id: number;
-  name: string;
+export interface ScoredPost {
+  post: WorkPostForRecommendation;
+  score: number;
 }
 
 //幫手的搜尋輸入
@@ -111,34 +128,22 @@ export interface WorkPostFilterInput {
   environments?: string[];
 }
 
-//取得幫手的搜尋訂閱
+//取得幫手的搜尋訂閱 api/works/post
 export interface FilterSubscription {
   name?: string | null;
   city?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   applicantCount?: number | null;
-  positionCategories?: Option[];
-  averageWorkHours?: number;
+  averageWorkHours?: number | null;
   minDuration?: number | null;
-  accommodations?: Option[];
-  meals?: Option[];
-  experiences?: Option[];
-  environments?: Option[];
-  filters?: Option[];
+  positionCategories?: string[];
+  accommodations?: string[];
+  meals?: string[];
+  experiences?: string[];
+  environments?: string[];
 }
-
 export interface Subscription {
   helperProfileId: string;
   filters: FilterSubscription;
-}
-
-export interface HostProfileResponse {
-  userId?: string;
-  unitName?: string;
-  address?: string;
-  city?: string | null;
-  district?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
 }

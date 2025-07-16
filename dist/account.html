@@ -4,29 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>帳號管理｜換煥 Haloop</title>
-    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> -->
     <link rel="stylesheet" href="/css/share.css" />
     <link rel="stylesheet" href="/css/acoount.css" />
     <script
       src="https://kit.fontawesome.com/adad1a32e8.js"
       crossorigin="anonymous"
     ></script>
-    <!-- <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> -->
-    <script type="module" crossorigin src="/assets/account-DaDib8kJ.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/nav-Bo_706sF.js">
+    <script type="module" crossorigin src="/assets/account-Bt_NeAk_.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/nav-Bm98H60T.js">
   </head>
   <body>
     <header>
       <div>
         <div class="left"><a href="/">換煥 Haloop</a></div>
         <div class="right">
-          <!-- <i class="fa-solid fa-comment"></i> -->
-          <!-- <div id="notification-position-div">
-            <div id="notification-list"></div>
-          </div> -->
           <i class="fa-solid fa-bell"></i>
           <div id="notification-count">3</div>
-          <!-- <div id="notification-count">3</div> -->
           <div id="menu-position-div">
             <div id="visitor-menu">
               <div id="sign-up-div">註冊</div>
@@ -35,14 +28,14 @@
             <div id="helper-menu">
               <div>收藏清單</div>
               <div>訂閱</div>
-              <div>旅程</div>
+              <a href="/chat.html"><div>訊息</div></a>
               <hr />
               <div class="account-management-btn">帳號</div>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="host-menu">
               <div>申請清單</div>
-              <div>訂閱</div>
+              <a href="/chat.html"><div>訊息</div></a>
               <hr />
               <div class="account-management-btn">帳號</div>
               <div class="log-out-btn">登出</div>
@@ -164,7 +157,6 @@
                   accept="image/*"
                 />
               </div>
-              <!-- <button class="save-form-data">儲存變更</button> -->
             </form>
           </div>
         </section>
@@ -360,7 +352,7 @@
                 <option value="7">一週</option>
                 <option value="14">兩週</option>
                 <option value="21">三週</option>
-                <option value="30">一個月</option>
+                <option value="28">一個月</option>
                 <option value="60">兩個月</option>
                 <option value="90">兩個月以上</option>
               </select>
@@ -412,7 +404,6 @@
                 placeholder="針對工作與需求補充說明"
                 id="position-description"
               ></textarea>
-              <!-- <button class="save-form-data">儲存變更</button> -->
             </form>
           </div>
           <div id="host-profile-bottom-right-wrap">
@@ -716,7 +707,6 @@
                 placeholder="針對提供的支持與環境補充說明"
                 id="benefits-description"
               ></textarea>
-              <!-- <button class="save-form-data">儲存變更</button> -->
             </form>
           </div>
         </section>
@@ -728,5 +718,61 @@
       <!-- HELPER PROFILE -->
       <section id="helper-profile-section"></section>
     </main>
+    <dialog id="sign-up-dialog">
+      <p>註冊</p>
+      <hr />
+      <form id="sign-up-form">
+        <input type="email" id="sign-up-email" placeholder="電子郵件" />
+        <input type="password" id="sign-up-passsword" placeholder="密碼" />
+        <input type="text" id="sign-up-username" placeholder="用戶名" />
+        <input type="text" id="sign-up-realname" placeholder="您的真實姓名" />
+        <label>選擇一個身份開始體驗平台</label>
+        <div id="sign-up-role-div">
+          <button
+            class="sign-up-role selected"
+            data-value="HELPER"
+            type="button"
+          >
+            幫手
+          </button>
+          <button class="sign-up-role" data-value="HOST" type="button">
+            店家
+          </button>
+        </div>
+        <button class="sign-up-submit-btn" type="submit">註冊</button>
+        <!-- <p>或</p>
+          <a href="">使用 Google 繼續</a> -->
+        <p id="sign-up-response-message"></p>
+      </form>
+    </dialog>
+    <dialog id="sign-in-dialog">
+      <p>登入</p>
+      <hr />
+      <form id="sign-in-form">
+        <input
+          type="email"
+          id="sign-in-email"
+          placeholder="請輸入電子郵件地址"
+        />
+        <input type="password" id="sign-in-password" placeholder="請輸入密碼" />
+        <label>選擇登入身份</label>
+        <div id="sign-in-role-div">
+          <button
+            class="sign-in-role selected"
+            data-value="HELPER"
+            type="button"
+          >
+            幫手
+          </button>
+          <button class="sign-in-role" data-value="HOST" type="button">
+            店家
+          </button>
+        </div>
+        <button class="sign-in-submit-btn">登入</button>
+        <!-- <p>或</p>
+          <a href="">使用 Google 繼續</a> -->
+        <p id="sign-in-response-message"></p>
+      </form>
+    </dialog>
   </body>
 </html>

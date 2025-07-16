@@ -1,6 +1,6 @@
-import { getElementById } from "../utils/dom-utils.js";
 import type { WorkPost } from "../types/Work.js";
-const API_BASE_URL = "https://haloopback-production.up.railway.app";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+console.log("Current Mode:", import.meta.env.VITE_API_URL);
 
 //用 token 取得當前使用者資訊
 async function getCurrentUser() {
@@ -11,30 +11,21 @@ async function getCurrentUser() {
   });
 
   if (!res.ok) {
-    console.error("Response not OK:", res.status);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("Response not OK:", res.status);
+    }
     return null;
   }
-
   let data = await res.json();
-
-  // let data;
-  // try {
-  //   const text = await res.text();
-  //   if (!text) {
-  //     console.warn("Empty response body");
-  //     return null;
-  //   }
-  //   data = JSON.parse(text);
-  // } catch (err) {
-  //   console.error("Failed to parse JSON:", err);
-  //   return null;
-  // }
-
   if (data.success) {
-    console.log("userData", data);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("userData", data);
+    }
     return data;
   } else {
-    console.log("userData", data);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("userData", data);
+    }
     return null;
   }
 }
@@ -103,7 +94,7 @@ async function initProfileByRole() {
 initProfileByRole();
 
 function initHostProfile() {
-  // host profile 多選按鈕樣式
+  // workpost 多選按鈕樣式
   document
     .querySelectorAll<HTMLButtonElement>(".toggle-option")
     .forEach((button) => {
@@ -112,31 +103,32 @@ function initHostProfile() {
       });
     });
 
-  // host profile 驗證時間先後（之後可改為提交表單時驗證）
-  const endInput = getElementById<HTMLInputElement>("work-end-date");
+  // workpost 驗證時間先後
+  const endInput = document.getElementById("work-end-date") as HTMLInputElement;
   endInput.addEventListener("change", () => {
-    const start = new Date(
-      getElementById<HTMLInputElement>("work-start-date").value
-    );
+    const startDate = document.getElementById(
+      "work-start-date"
+    ) as HTMLInputElement;
+    const start = new Date(startDate.value);
     const end = new Date(endInput.value);
     if (end <= start) {
       alert("結束時間必須大於起始時間！");
     }
   });
 
-  // host profile 取值
+  // workpost 取值函式
   function getInputValue(id: string): string {
     const el = document.getElementById(id) as HTMLInputElement | null;
-    return el?.value.trim() || ""; //移除字串開頭與結尾的空白字元
+    return el?.value.trim() || "";
   }
 
-  // host profile 取值
+  // workpost 取值函式
   function getTextareaValue(id: string): string {
     const el = document.getElementById(id) as HTMLTextAreaElement | null;
-    return el?.value.trim() || ""; //移除字串開頭與結尾的空白字元
+    return el?.value.trim() || "";
   }
 
-  // host profile 取值
+  // workpost 取值函式
   function getSelectNumberValue(id: string): number {
     const el = document.getElementById(id);
     if (el && el instanceof HTMLSelectElement) {
@@ -146,51 +138,45 @@ function initHostProfile() {
         return num;
       }
     }
-    return 0; // 預設值
+    return 0;
   }
 
-  // host profile 取值
+  // workpost 取值函式
   function getSelectedOptionValues(selector: string): string[] {
-    // const result: Option[] = [];
     const result: string[] = [];
     const selectedButtons = document.querySelectorAll(`${selector}.selected`);
 
     selectedButtons.forEach((btn) => {
       const element = btn as HTMLElement;
-      // const idStr = element.dataset.id;
       const name = element.dataset.value;
       if (name) {
         result.push(name);
       }
-      // if (idStr && name) {
-      //   const id = parseInt(idStr);
-      //   if (!isNaN(id)) {
-      //     result.push({ id, name });
-      //   }
-      // }
     });
     return result;
   }
 
-  const postWorkBtn = getElementById<HTMLButtonElement>("post-work-btn");
-  const imageInput = document.getElementById(
-    "host-img-file"
-  ) as HTMLInputElement;
-
-  //上傳貼文
+  // 點擊按鈕，上傳貼文
+  const postWorkBtn = document.getElementById(
+    "post-work-btn"
+  ) as HTMLButtonElement;
   postWorkBtn.addEventListener("click", async (e) => {
     e.preventDefault();
+    const imageInput = document.getElementById(
+      "host-img-file"
+    ) as HTMLInputElement;
+
+    // 將圖片上傳至 S3
     const imageFiles = imageInput.files;
-    console.log("01前端抓取輸入的img檔案", imageFiles);
-
     const imageUrls: string[] = [];
-
     if (imageFiles && imageFiles.length > 0) {
       const uploadData = new FormData();
       Array.from(imageFiles).forEach((imageFile) => {
-        uploadData.append("images", imageFile); // 多檔案用相同 key
+        uploadData.append("images", imageFile);
       });
-      console.log("02前端準備上傳的img檔案", uploadData.getAll("images"));
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("前端準備上傳的img檔案", uploadData.getAll("images"));
+      }
 
       const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
         method: "POST",
@@ -198,14 +184,13 @@ function initHostProfile() {
       });
       const { urls } = await uploadResponse.json();
       imageUrls.push(...urls);
-      console.log("06前端收到urls回覆，轉為string list", imageUrls);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("前端收到 imageUrls string list", imageUrls);
+      }
     }
 
-    // 建立 WorkPost 資料
+    // 整理 WorkPost 資料
     let postData: WorkPost = {
-      // unitName: getInputValue("unit-name"),
-      // address: getInputValue("unit-address"),
-      // unitDescription: getTextareaValue("unit-description"),
       startDate: getInputValue("work-start-date"),
       endDate: getInputValue("work-end-date"),
       recruitCount: getSelectNumberValue("recruit-count"),
@@ -224,9 +209,11 @@ function initHostProfile() {
       environments: getSelectedOptionValues(".environment-option-btn"),
       benefitsDescription: getTextareaValue("benefits-description"),
     };
-    console.log("01前端準備上傳的postData", postData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("前端準備上傳的 postData", postData);
+    }
 
-    // 將資料存至/works
+    // 將 WorkPost 資料存至資料庫
     let WorkPostResponse = await fetch(`${API_BASE_URL}/api/works`, {
       method: "POST",
       headers: {
@@ -236,11 +223,9 @@ function initHostProfile() {
       body: JSON.stringify(postData),
     });
     const WorkPostResponseData: WorkPost = await WorkPostResponse.json();
-    // const { city, district, latitude, longitude } = WorkPostResponseData;
-    // if (!city || !district || latitude === null || longitude === null) {
-    //   alert("地址未解析成功，可能於區域篩選中被忽略，請確認您填寫的地址正確");
-    // }
-    console.log("05前端收到", WorkPostResponseData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("前端收到 WorkPost 上傳 response", WorkPostResponseData);
+    }
   });
 }
 
@@ -300,8 +285,7 @@ async function initUserProfile(userData: any) {
           return inputValue;
         }
       }
-
-      return undefined; // 使用者輸入的值不在 datalist 中
+      return undefined;
     }
     const unitDescription = document.getElementById(
       "unit-description"
@@ -313,7 +297,9 @@ async function initUserProfile(userData: any) {
       unitDescription: unitDescription.value,
       city: getSelectedCity(),
     };
-    console.log("01前端送出Data", data);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("前端送出Data", data);
+    }
     const profileResponse = await fetch(`${API_BASE_URL}/api/profile/host`, {
       method: "POST",
       headers: {
@@ -323,6 +309,8 @@ async function initUserProfile(userData: any) {
       body: JSON.stringify(data),
     });
     const profileResponseData = await profileResponse.json();
-    console.log("前端獲得 profileResponseData", profileResponseData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("前端獲得 profileResponseData", profileResponseData);
+    }
   });
 }

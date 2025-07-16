@@ -1,5 +1,3 @@
-// import type { WorkPost } from "./Work";
-
 export enum UserType {
   HELPER = "HELPER",
   HOST = "HOST",
@@ -16,9 +14,8 @@ export interface User {
   lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  // 關聯（可選，取決於是否需要 populate）
-  helperProfile?: HelperProfile | null;
-  hostProfile?: HostProfile | null;
+  // helperProfile?: HelperProfile | null;
+  // hostProfile?: HostProfile | null;
 }
 
 export interface HelperProfile {

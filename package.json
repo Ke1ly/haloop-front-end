@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "@types/google.maps": "^3.58.1",
+    "@types/node": "^22.15.31",
+    "typescript": "5.8.3",
+    "vite": "6.3.5"
   },
   "dependencies": {
-    "litepicker": "^2.0.12"
+    "litepicker": "^2.0.12",
+    "socket.io-client": "^4.8.1"
   }
 }

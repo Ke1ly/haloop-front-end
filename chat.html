@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Demo</title>
+    <script
+      src="https://kit.fontawesome.com/adad1a32e8.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/css/share.css" />
+    <link rel="stylesheet" href="/css/chat.css" />
+    <script defer type="module" src="/src/pages/nav.ts"></script>
+    <script defer type="module" src="/src/pages/chat.ts"></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="left"><a href="/">換煥 Haloop</a></div>
+        <div class="right">
+          <i class="fa-solid fa-bell"></i>
+          <div id="notification-count">3</div>
+          <div id="menu-position-div">
+            <div id="visitor-menu">
+              <div id="sign-up-div">註冊</div>
+              <div id="sign-in-div">登入</div>
+            </div>
+            <div id="helper-menu">
+              <div>收藏清單</div>
+              <div>訂閱</div>
+              <a href="/chat.html"><div>訊息</div></a>
+              <hr />
+              <div class="account-management-btn">帳號</div>
+              <div class="log-out-btn">登出</div>
+            </div>
+            <div id="host-menu">
+              <div>申請清單</div>
+              <div>訊息</div>
+              <hr />
+              <div class="account-management-btn">帳號</div>
+              <div class="log-out-btn">登出</div>
+            </div>
+            <div id="notification-list"></div>
+          </div>
+          <button id="show-menu-btn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    <section id="chat-container">
+      <section id="conversations-sidebar">
+        <div id="sidebar-header">所有訊息</div>
+        <section id="conversations-list"></section>
+      </section>
+
+      <section id="chat-main">
+        <section id="chat-header">
+          <div id="chat-header-left">
+            <div>
+              <img id="header-other-avatar" src="" alt="" />
+            </div>
+            <div id="header-other-username"></div>
+          </div>
+          <div id="header-role-reminder"></div>
+        </section>
+        <section id="messages-default">
+          <div>
+            <i class="fa-regular fa-comments"></i>
+            <p id="currentConversationTitle">選擇一個對話開始聊天</p>
+          </div>
+        </section>
+        <section id="messages-container"></section>
+        <section id="message-input-container">
+          <form id="message-input-form">
+            <textarea id="message-input" placeholder="輸入訊息..."></textarea>
+            <button type="submit" id="send-button">發送</button>
+          </form>
+        </section>
+      </section>
+    </section>
+    <template id="message-template">
+      <section class="message">
+        <div class="message-avatar">
+          <img src="" alt="" />
+        </div>
+        <div class="message-content">
+          <div class="message-time"></div>
+          <div class="message-text"></div>
+        </div>
+      </section>
+    </template>
+    <template id="conversation-template">
+      <section class="conversation-item">
+        <div class="conversation-item-left">
+          <div class="avatar">
+            <img src="" alt="" />
+            <div class="role-indicator"></div>
+          </div>
+        </div>
+        <div class="conversation-item-middle">
+          <div class="conversation-info">
+            <div class="conversation-title"></div>
+          </div>
+          <div class="conversation-meta">
+            <div class="last-message"></div>
+            <div class="timestamp"></div>
+          </div>
+        </div>
+        <div class="conversation-item-right">
+          <div class="unread-badge"></div>
+        </div>
+      </section>
+    </template>
+    <dialog id="sign-up-dialog">
+      <p>註冊</p>
+      <hr />
+      <form id="sign-up-form">
+        <input type="email" id="sign-up-email" placeholder="電子郵件" />
+        <input type="password" id="sign-up-passsword" placeholder="密碼" />
+        <input type="text" id="sign-up-username" placeholder="用戶名" />
+        <input type="text" id="sign-up-realname" placeholder="您的真實姓名" />
+        <label>選擇一個身份開始體驗平台</label>
+        <div id="sign-up-role-div">
+          <button
+            class="sign-up-role selected"
+            data-value="HELPER"
+            type="button"
+          >
+            幫手
+          </button>
+          <button class="sign-up-role" data-value="HOST" type="button">
+            店家
+          </button>
+        </div>
+        <button class="sign-up-submit-btn" type="submit">註冊</button>
+        <!-- <p>或</p>
+          <a href="">使用 Google 繼續</a> -->
+        <p id="sign-up-response-message"></p>
+      </form>
+    </dialog>
+    <dialog id="sign-in-dialog">
+      <p>登入</p>
+      <hr />
+      <form id="sign-in-form">
+        <input
+          type="email"
+          id="sign-in-email"
+          placeholder="請輸入電子郵件地址"
+        />
+        <input type="password" id="sign-in-password" placeholder="請輸入密碼" />
+        <label>選擇登入身份</label>
+        <div id="sign-in-role-div">
+          <button
+            class="sign-in-role selected"
+            data-value="HELPER"
+            type="button"
+          >
+            幫手
+          </button>
+          <button class="sign-in-role" data-value="HOST" type="button">
+            店家
+          </button>
+        </div>
+        <button class="sign-in-submit-btn">登入</button>
+        <!-- <p>或</p>
+          <a href="">使用 Google 繼續</a> -->
+        <p id="sign-in-response-message"></p>
+      </form>
+    </dialog>
+  </body>
+</html>
