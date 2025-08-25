@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>post</title>
+    <title>換宿條件｜換煥 Haloop</title>
     <script
       src="https://kit.fontawesome.com/adad1a32e8.js"
       crossorigin="anonymous"
@@ -19,25 +19,27 @@
         <div class="left"><a href="/">換煥 Haloop</a></div>
         <div class="right">
           <i class="fa-solid fa-bell"></i>
-          <div id="notification-count">3</div>
+          <div id="notification-count" style="display: none">
+            <p id="notification-count-number"></p>
+          </div>
           <div id="menu-position-div">
             <div id="visitor-menu">
               <div id="sign-up-div">註冊</div>
               <div id="sign-in-div">登入</div>
             </div>
             <div id="helper-menu">
-              <div>收藏清單</div>
-              <div>訂閱</div>
+              <!-- <div>收藏清單</div> -->
+              <a href="/subscription.html"><div>訂閱</div></a>
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="host-menu">
-              <div>申請清單</div>
-              <div>訊息</div>
+              <!-- <div>申請清單</div> -->
+              <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="notification-list"></div>
@@ -59,12 +61,12 @@
               <span class="unit-district"></span>
             </div>
             <div class="button-wrap">
-              <div class="favorite-btn">
+              <!-- <div class="favorite-btn">
                 <i class="fa-regular fa-heart"></i> 收藏
-              </div>
-              <div class="share-btn">
+              </div> -->
+              <!-- <div class="share-btn">
                 <i class="fa-solid fa-arrow-up-from-bracket"></i> 分享
-              </div>
+              </div> -->
             </div>
           </section>
           <section id="summary-bottom-wrap">
@@ -82,12 +84,12 @@
                 <div class="min-duration"></div>
                 <div class="recruit-count"></div>
               </div>
-              <div id="calendar"></div>
-              <div id="calendar-status"></div>
+              <!-- <div id="calendar"></div>
+              <div id="calendar-status"></div> -->
             </div>
           </section>
 
-          <button id="apply-btn">立即申請</button>
+          <!-- <button id="apply-btn">立即申請</button> -->
         </section>
       </section>
       <section id="description">
@@ -159,33 +161,7 @@
         </section>
       </section>
     </main>
-    <dialog id="sign-up-dialog">
-      <p>註冊</p>
-      <hr />
-      <form id="sign-up-form">
-        <input type="email" id="sign-up-email" placeholder="電子郵件" />
-        <input type="password" id="sign-up-passsword" placeholder="密碼" />
-        <input type="text" id="sign-up-username" placeholder="用戶名" />
-        <input type="text" id="sign-up-realname" placeholder="您的真實姓名" />
-        <label>選擇一個身份開始體驗平台</label>
-        <div id="sign-up-role-div">
-          <button
-            class="sign-up-role selected"
-            data-value="HELPER"
-            type="button"
-          >
-            幫手
-          </button>
-          <button class="sign-up-role" data-value="HOST" type="button">
-            店家
-          </button>
-        </div>
-        <button class="sign-up-submit-btn" type="submit">註冊</button>
-        <!-- <p>或</p>
-          <a href="">使用 Google 繼續</a> -->
-        <p id="sign-up-response-message"></p>
-      </form>
-    </dialog>
+
     <dialog id="sign-in-dialog">
       <p>登入</p>
       <hr />
@@ -213,6 +189,7 @@
         <!-- <p>或</p>
           <a href="">使用 Google 繼續</a> -->
         <p id="sign-in-response-message"></p>
+        <div>還沒有帳號？<a href="/signup.html">前往註冊</a></div>
       </form>
     </dialog>
   </body>

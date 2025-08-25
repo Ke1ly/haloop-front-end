@@ -1,88 +1,111 @@
-body > nav {
-  max-width: 1200px;
-  margin: 40px auto;
-  display: flex;
-  div {
-    margin: 0px 10px;
-    cursor: pointer;
-  }
-}
 body > main {
   max-width: 1200px;
   margin: 0px auto;
   padding: 10px;
 }
-body > nav {
+body > main > section#profile-section-wrap {
+  position: relative;
+}
+body > main > section#profile-section-wrap > nav {
+  position: relative;
+  top: 25px;
+  z-index: 0;
+  max-width: 1200px;
+  margin: 0px auto;
+  display: flex;
+  flex-direction: row;
   div {
-    padding: 10px 10px;
-    border-radius: 10px;
-    border: 1px solid rgb(151, 151, 151);
-    color: rgb(151, 151, 151);
+    /* margin: 0px 10px; */
+    cursor: pointer;
+    padding: 20px 40px;
+    border-radius: 30px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    height: 75px;
+    /* color: rgb(151, 151, 151); */
+    background-color: rgb(215, 205, 191);
     &:hover {
-      border: 1px solid #000000;
+      background-color: rgb(221, 214, 204);
+      /* border: 1px solid #000000; */
       color: #000000;
     }
   }
   div.selected {
-    border: 1px solid #000000;
+    background-color: white;
+    border: none;
     color: #000000;
-    background-color: #eeeeee;
+  }
+  div#host-profile-btn {
+    display: none;
   }
 }
 
-body > main > section#user-profile-section {
+body > main > section#profile-section-wrap > section#host-basic-section {
+  position: relative;
+  z-index: 3;
   display: none;
-  /* display: flex; */
   flex-direction: column;
-  justify-content: space-between;
-  form {
-    label {
-      font-weight: 500;
-      font-size: 14px;
+  background-color: white;
+  padding: 30px 30px;
+  border-radius: 30px;
+  section#host-basic-wrap {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    form#host-basic-profile-top-form {
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 20px 20px;
+      flex-basis: 300px;
     }
-    input,
-    select,
-    textarea {
-      margin-top: 5px;
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #cccccc;
-      border-radius: 10px;
-      outline: #000000;
-      &:focus {
-        border: 1.5px solid #000000;
+    form#host-basic-profile-bottom-form {
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 20px 20px;
+      flex-basis: 300px;
+      flex-grow: 1;
+      margin-left: 30px;
+    }
+    form {
+      div#host-basic-profile-top-form-wrap,
+      div#host-basic-profile-bottom-form-wrap {
+        display: flex;
+        flex-direction: column;
+        margin-right: 30px;
+      }
+      label {
+        font-weight: 500;
+        font-size: 14px;
+      }
+      input,
+      select,
+      textarea {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        outline: #000000;
+        &:focus {
+          border: 1.5px solid #000000;
+        }
+      }
+      textarea {
+        height: 150px;
+        resize: none;
       }
     }
-    textarea {
-      height: 150px;
-      resize: none;
-    }
-    button.toggle-option,
-    button.radio-option {
-      margin: 5px 0px;
-      padding: 8px 15px;
-      border: 1px solid #cccccc;
-      border-radius: 20px;
-      background-color: white;
-      cursor: pointer;
-    }
-    button.toggle-option.selected,
-    button.radio-option.selected {
-      background-color: #eaeaea;
-      border: 1px solid #000000;
-    }
   }
-  div#basic-profile-top-form-wrap,
-  div#basic-profile-bottom-form-wrap {
-    display: flex;
-    flex-direction: column;
-  }
-  div#save-userform-data-btn-div {
+  div#save-host-basic-btn-div {
     padding: 15px 5px;
     display: flex;
     flex-direction: row;
     justify-content: end;
-    button#save-userform-data-btn {
+    align-items: center;
+    div#host-basic-response-message {
+      margin-right: 20px;
+    }
+    button#save-host-basic-btn {
       border: none;
       background-color: rgb(55, 55, 55);
       color: white;
@@ -95,19 +118,106 @@ body > main > section#user-profile-section {
         background-color: black;
         box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
       }
+      &:disabled {
+        background-color: rgb(149, 149, 149);
+        cursor: default;
+        &:hover {
+          background-color: rgb(149, 149, 149);
+          box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.3);
+        }
+      }
     }
   }
 }
 
-body > main > section#helper-profile-section {
+body > main > section#profile-section-wrap > section#helper-basic-section {
+  position: relative;
+  z-index: 3;
   display: none;
-}
+  flex-direction: column;
+  background-color: white;
+  padding: 30px 30px;
+  border-radius: 30px;
+  form {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    div#helper-basic-profile-left-form-wrap {
+      display: flex;
+      flex-direction: column;
+      margin-right: 30px;
+      flex-basis: 300px;
+    }
+    div#helper-basic-profile-right-form-wrap {
+      display: flex;
+      flex-direction: column;
+      flex-basis: 300px;
+      flex-grow: 1;
+    }
+    label {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    input,
+    textarea {
+      margin-top: 10px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #cccccc;
+      border-radius: 10px;
+      outline: #000000;
+      &:focus {
+        border: 1.5px solid #000000;
+      }
+    }
+    textarea {
+      height: 300px;
+      resize: none;
+    }
+  }
 
-body > main > section#host-profile-section {
+  div#save-helper-basic-btn-div {
+    padding: 15px 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    div#helper-basic-response-message {
+      margin-right: 20px;
+    }
+    button#save-helper-basic-btn {
+      border: none;
+      background-color: rgb(55, 55, 55);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+      cursor: pointer;
+      &:hover {
+        background-color: black;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+      }
+      &:disabled {
+        background-color: rgb(149, 149, 149);
+        cursor: default;
+        &:hover {
+          background-color: rgb(149, 149, 149);
+          box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.3);
+        }
+      }
+    }
+  }
+}
+body > main > section#profile-section-wrap > section#host-profile-section {
+  position: relative;
+  z-index: 3;
   display: none;
-  /* display: flex; */
   flex-direction: column;
   justify-content: space-between;
+  background-color: white;
+  padding: 30px 30px;
+  border-radius: 30px;
   form {
     label {
       font-weight: 500;
@@ -129,6 +239,10 @@ body > main > section#host-profile-section {
     textarea {
       height: 150px;
       resize: none;
+    }
+    input,
+    select {
+      max-width: 300px;
     }
     button.toggle-option,
     button.radio-option {
@@ -167,7 +281,11 @@ body > main > section#host-profile-section {
   }
 }
 
-body > main > section#host-profile-section > section#host-profile-top {
+body
+  > main
+  > section#profile-section-wrap
+  > section#host-profile-section
+  > section#host-profile-top {
   margin-bottom: 20px;
   div#host-profile-top-wrap {
     position: relative;
@@ -178,9 +296,7 @@ body > main > section#host-profile-section > section#host-profile-top {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      div#host-profile-top-left,
-      div#host-profile-top-middle,
-      div#host-profile-top-right {
+      div#host-profile-top-left {
         padding: 20px 20px;
         flex-basis: 200px;
         flex-grow: 1;
@@ -188,17 +304,44 @@ body > main > section#host-profile-section > section#host-profile-top {
         flex-direction: column;
         flex-wrap: wrap;
       }
-      button {
-        margin: 20px;
-        position: absolute;
-        bottom: 0px;
-        right: 0px;
+      div#host-profile-top-right {
+        padding: 20px 20px;
+        flex-basis: 550px;
+        flex-grow: 3;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        input[type="file"] {
+          display: none;
+        }
+        label#img-upload-button {
+          padding: 10px 20px;
+          border-radius: 20px;
+          background-color: rgb(233, 233, 232);
+          cursor: pointer;
+          margin-top: 10px;
+          width: 100px;
+        }
+        div#img-preview {
+          margin-top: 10px;
+          img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin: 10px 10px;
+            border-radius: 20px;
+          }
+        }
       }
     }
   }
 }
 
-body > main > section#host-profile-section > section#host-profile-bottom {
+body
+  > main
+  > section#profile-section-wrap
+  > section#host-profile-section
+  > section#host-profile-bottom {
   margin-top: 20px;
   display: flex;
   flex-direction: row;
@@ -207,8 +350,7 @@ body > main > section#host-profile-section > section#host-profile-bottom {
   div#host-profile-bottom-right-wrap {
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
     border-radius: 20px;
-    padding: 0px 10px;
-    flex-basis: 200px;
+    flex-basis: 450px;
     flex-grow: 1;
     padding: 20px 20px;
     h5 {
@@ -232,6 +374,103 @@ body > main > section#host-profile-section > section#host-profile-bottom {
     div {
       margin-top: 5px;
       margin-bottom: 10px;
+    }
+  }
+}
+
+body > dialog#error-dialog {
+  width: 300px;
+  border-radius: 15px;
+  border: none;
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: top 0.5s ease-out;
+  padding: 20px 20px;
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+body > dialog#error-dialog.show {
+  top: 80px;
+}
+
+@media (max-width: 1020px) {
+  body
+    > main
+    > section#profile-section-wrap
+    > section#host-profile-section
+    > section#host-profile-bottom {
+    div#host-profile-bottom-left-wrap {
+      margin-right: 0px;
+      flex-basis: 500px;
+    }
+    div#host-profile-bottom-right-wrap {
+      margin-top: 20px;
+      margin-left: 0px;
+      flex-basis: 500px;
+    }
+  }
+}
+
+@media (max-width: 650px) {
+  body
+    > main
+    > section#profile-section-wrap
+    > section#host-profile-section
+    > section#host-profile-top {
+    div#host-profile-top-wrap {
+      form#host-profile-general {
+        div#host-profile-top-right {
+          div#img-preview {
+            img {
+              width: 120px;
+              height: 120px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 710px) {
+  body > main > section#profile-section-wrap > section#host-basic-section {
+    section#host-basic-wrap {
+      form#host-basic-profile-top-form {
+        flex-grow: 1;
+        flex-basis: 350px;
+      }
+      form#host-basic-profile-bottom-form {
+        flex-basis: 350px;
+        margin-left: 0px;
+        flex-grow: 1;
+        margin-top: 30px;
+      }
+    }
+  }
+}
+@media (max-width: 450px) {
+  body
+    > main
+    > section#profile-section-wrap
+    > section#host-profile-section
+    > section#host-profile-top {
+    div#host-profile-top-wrap {
+      form#host-profile-general {
+        div#host-profile-top-right {
+          div#img-preview {
+            img {
+              width: 90px;
+              height: 90px;
+            }
+          }
+        }
+      }
     }
   }
 }

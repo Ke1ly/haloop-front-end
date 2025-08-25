@@ -1,5 +1,5 @@
 import type { WorkPostForCardRender } from "../types/Work";
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+import { API_BASE_URL } from "../utils/config.js";
 
 // 取得並渲染推薦貼文
 async function getRecommWorkPosts(): Promise<WorkPostForCardRender[]> {
@@ -121,10 +121,7 @@ async function initRecommendationSection() {
     let userData = await getCurrentUser();
     if (userData.userType == "HELPER") {
       initRecommendation();
-      const greetingDiv = document.getElementById(
-        "greetings"
-      ) as HTMLDivElement;
-      greetingDiv.style.display = "block";
+
       const helperName = document.querySelector(
         ".helper-name"
       ) as HTMLParagraphElement;
@@ -135,9 +132,16 @@ async function initRecommendationSection() {
   }
 }
 initRecommendationSection();
+
 async function initRecommendation() {
   const recommendationData = await getRecommWorkPosts();
-  renderRecommWorkPosts(recommendationData);
+  if (recommendationData && recommendationData.length > 0) {
+    renderRecommWorkPosts(recommendationData);
+    const greetingDiv = document.getElementById("greetings") as HTMLDivElement;
+    greetingDiv.style.display = "block";
+  } else {
+    console.log("目前沒有更新的貼文可推薦");
+  }
 }
 
 // 按鈕導向至探索頁面
@@ -159,3 +163,31 @@ function updateStickyElementColor() {
   }
 }
 window.addEventListener("scroll", updateStickyElementColor);
+
+const container = document.getElementById(
+  "recommendation-posts"
+) as HTMLElement;
+let scrollSpeed = 30; // 每幀滾動像素數，調整速度
+let animationFrame: any;
+
+function autoScroll() {
+  container.scrollLeft += scrollSpeed; // 每次向右滾動指定像素
+
+  // 如果滾動到末尾，重置到開頭（無縫滾動）
+  if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+    container.scrollLeft = 0;
+  }
+
+  animationFrame = requestAnimationFrame(autoScroll); // 持續執行動畫
+}
+
+// 啟動滾動
+autoScroll();
+
+// 可選：滑鼠懸停時暫停滾動
+container.addEventListener("mouseenter", () => {
+  cancelAnimationFrame(animationFrame);
+});
+container.addEventListener("mouseleave", () => {
+  autoScroll();
+});

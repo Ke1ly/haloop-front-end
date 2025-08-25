@@ -3,7 +3,7 @@ import type { WorkPostFilterInput, WorkPostForCardRender } from "../types/Work";
 import Litepicker from "litepicker";
 import "litepicker/dist/css/litepicker.css";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+import { API_BASE_URL } from "../utils/config.js";
 
 //獲得要呈現在頁面上的所有貼文資料
 async function getWorkPosts(
@@ -31,180 +31,269 @@ async function getWorkPosts(
 }
 
 //根據貼文資料，渲染 CardList
-async function renderWorkPosts(postsData: WorkPostForCardRender[]) {
-  const workListSection = document.getElementById("work-list") as HTMLElement;
-  workListSection.replaceChildren();
-  postsData.forEach((postData) => {
-    const workPostTemplate = document.getElementById(
-      "work-post-template"
-    ) as HTMLTemplateElement;
-    const workPostTemplateClone = workPostTemplate.content.cloneNode(
-      true
-    ) as DocumentFragment;
-    const postSection = workPostTemplateClone.querySelector(
-      ".work-post"
-    ) as HTMLElement;
-    postSection.dataset.unitId = postData.unit.id;
-    postSection.addEventListener("mouseenter", () => {
-      highlightMarker(postData.unit.id);
-      postSection.classList.add("highlight");
-    });
-    postSection.addEventListener("mouseleave", () => {
-      postSection.classList.remove("highlight");
-    });
-
-    const postA = workPostTemplateClone.querySelector("a") as HTMLAnchorElement;
-    postA.href = `/workpost/${postData.id}`;
-    postA.target = "_blank";
-
-    const positionName = workPostTemplateClone.querySelector(
-      ".position-name"
-    ) as HTMLElement;
-    if (positionName) {
-      positionName.textContent = postData.positionName;
-    } else {
-      console.warn("Missing .position-name element in template");
-    }
-
-    const positionCategories = workPostTemplateClone.querySelector(
-      ".position-categories"
-    ) as HTMLElement;
-    if (positionCategories) {
-      postData.positionCategories.forEach((positionCategoryOption) => {
-        let divTag = document.createElement("div");
-        divTag.textContent = positionCategoryOption;
-        positionCategories.appendChild(divTag);
+async function renderWorkPosts(
+  postsData: WorkPostForCardRender[],
+  filter?: WorkPostFilterInput
+) {
+  const workPostSection = document.getElementById("posts") as HTMLElement;
+  workPostSection.replaceChildren();
+  if (postsData.length > 0) {
+    const noPost = document.getElementById("no-post") as HTMLDivElement;
+    noPost.style.display = "none";
+    postsData.forEach((postData) => {
+      const workPostTemplate = document.getElementById(
+        "work-post-template"
+      ) as HTMLTemplateElement;
+      const workPostTemplateClone = workPostTemplate.content.cloneNode(
+        true
+      ) as DocumentFragment;
+      const postSection = workPostTemplateClone.querySelector(
+        ".work-post"
+      ) as HTMLElement;
+      postSection.dataset.unitId = postData.unit.id;
+      postSection.addEventListener("mouseenter", () => {
+        highlightMarker(postData.unit.id);
+        postSection.classList.add("highlight");
       });
-    } else {
-      console.warn("Missing .position-categories element in template");
-    }
+      postSection.addEventListener("mouseleave", () => {
+        postSection.classList.remove("highlight");
+      });
 
-    const unitName = workPostTemplateClone.querySelector(
-      ".unit-name"
-    ) as HTMLElement;
-    if (unitName) {
-      unitName.textContent = postData.unit.unitName!;
-    } else {
-      console.warn("Missing .unit-name element in template");
-    }
+      const postA = workPostTemplateClone.querySelector(
+        "a"
+      ) as HTMLAnchorElement;
+      postA.href = `/workpost/${postData.id}`;
+      postA.target = "_blank";
 
-    const avgWorkHours = workPostTemplateClone.querySelector(
-      ".avg-work-hours"
-    ) as HTMLElement;
-    if (avgWorkHours) {
-      avgWorkHours.textContent = `${postData.averageWorkHours}`;
-    } else {
-      console.warn("Missing .avg-work-hours element in template");
-    }
-
-    const minDuration = workPostTemplateClone.querySelector(
-      ".min-stay-days"
-    ) as HTMLElement;
-    if (minDuration) {
-      if (postData.minDuration == 0) {
-        minDuration.textContent = "無限制";
-      } else if (postData.minDuration == 7) {
-        minDuration.textContent = "一週";
-      } else if (postData.minDuration == 14) {
-        minDuration.textContent = "兩週";
-      } else if (postData.minDuration == 21) {
-        minDuration.textContent = "三週";
-      } else if (postData.minDuration == 28) {
-        minDuration.textContent = "一個月";
-      } else if (postData.minDuration == 60) {
-        minDuration.textContent = "兩個月";
-      } else if (postData.minDuration == 90) {
-        minDuration.textContent = "兩個月以上";
+      const positionName = workPostTemplateClone.querySelector(
+        ".position-name"
+      ) as HTMLElement;
+      if (positionName) {
+        positionName.textContent = postData.positionName;
+      } else {
+        console.warn("Missing .position-name element in template");
       }
-    } else {
-      console.warn("Missing .min-stay-days element in template");
-    }
+      const unitName = workPostTemplateClone.querySelector(
+        ".unit-name"
+      ) as HTMLElement;
+      if (unitName) {
+        unitName.textContent = postData.unit.unitName!;
+      } else {
+        console.warn("Missing .unit-name element in template");
+      }
 
-    const accommodations = workPostTemplateClone.querySelector(
-      ".accommodations"
-    ) as HTMLElement;
-    if (accommodations) {
-      postData.accommodations.forEach((accommodationOption) => {
-        let divTag = document.createElement("div");
-        divTag.textContent = accommodationOption;
-        accommodations.appendChild(divTag);
-      });
-    } else {
-      console.warn("Missing .accommodations element in template");
-    }
-    const experiences = workPostTemplateClone.querySelector(
-      ".experiences"
-    ) as HTMLElement;
-    if (experiences) {
-      postData.experiences.forEach((experienceOption) => {
-        let divTag = document.createElement("div");
-        divTag.textContent = experienceOption;
-        experiences.appendChild(divTag);
-      });
-    } else {
-      console.warn("Missing .experiences element in template");
-    }
+      const avgWorkHours = workPostTemplateClone.querySelector(
+        ".avg-work-hours"
+      ) as HTMLElement;
+      if (avgWorkHours) {
+        avgWorkHours.textContent = `平均每日工時 ${postData.averageWorkHours} 小時`;
+      } else {
+        console.warn("Missing .avg-work-hours element in template");
+      }
 
-    const environments = workPostTemplateClone.querySelector(
-      ".environments"
-    ) as HTMLElement;
-    if (environments) {
-      postData.environments.forEach((experienceOption) => {
-        let divTag = document.createElement("div");
-        divTag.textContent = experienceOption;
-        environments.appendChild(divTag);
-      });
-    } else {
-      console.warn("Missing .environments element in template");
-    }
-    const meals = workPostTemplateClone.querySelector(".meals") as HTMLElement;
-    if (meals) {
-      postData.meals.forEach((experienceOption) => {
-        let divTag = document.createElement("div");
-        divTag.textContent = experienceOption;
-        meals.appendChild(divTag);
-      });
-    } else {
-      console.warn("Missing .meals element in template");
-    }
-    const imagesDiv = workPostTemplateClone.querySelector(
-      ".work-post-images"
-    ) as HTMLElement;
-    if (imagesDiv) {
-      postData.images.forEach((image) => {
-        let imgTag = document.createElement("img");
-        imgTag.src = image;
-        imagesDiv.appendChild(imgTag);
-      });
-    } else {
-      console.warn("Missing .work-post-images element in template");
-    }
-    const images = imagesDiv.querySelectorAll("img");
-    if (images && images.length > 0) {
-      const imageWidth = 240;
-      const prevBtn = workPostTemplateClone.querySelector(".right-arrow")!;
-      const nextBtn = workPostTemplateClone.querySelector(".left-arrow")!;
-      let currentIndex = 0;
-      nextBtn.addEventListener("click", () => {
-        if (currentIndex < images.length - 1) {
-          currentIndex++;
-          imagesDiv.style.transform = `translateX(-${
-            currentIndex * imageWidth
-          }px)`;
+      const minDuration = workPostTemplateClone.querySelector(
+        ".min-stay-days"
+      ) as HTMLElement;
+      if (minDuration) {
+        if (postData.minDuration == 0) {
+          minDuration.textContent = "無限制最短停留時間";
+        } else if (postData.minDuration == 7) {
+          minDuration.textContent = "最短停留一週";
+        } else if (postData.minDuration == 14) {
+          minDuration.textContent = "最短停留兩週";
+        } else if (postData.minDuration == 21) {
+          minDuration.textContent = "最短停留三週";
+        } else if (postData.minDuration == 28) {
+          minDuration.textContent = "最短停留一個月";
+        } else if (postData.minDuration == 60) {
+          minDuration.textContent = "最短停留兩個月";
+        } else if (postData.minDuration == 90) {
+          minDuration.textContent = "最短停留兩個月以上";
         }
-      });
-
-      prevBtn.addEventListener("click", () => {
-        if (currentIndex > 0) {
-          currentIndex--;
-          imagesDiv.style.transform = `translateX(-${
-            currentIndex * imageWidth
-          }px)`;
+      } else {
+        console.warn("Missing .min-stay-days element in template");
+      }
+      const filterTags = workPostTemplateClone.querySelector(
+        ".filter-tags"
+      ) as HTMLElement;
+      if (filterTags && filter) {
+        if (filter.positionCategories && filter.positionCategories.length > 0) {
+          postData.positionCategories.forEach((positionCategoryOption) => {
+            if (filter.positionCategories?.includes(positionCategoryOption)) {
+              let divTag = document.createElement("div");
+              divTag.textContent = positionCategoryOption;
+              filterTags.appendChild(divTag);
+            }
+          });
         }
-      });
-    }
-    workListSection.appendChild(workPostTemplateClone);
-  });
+        if (filter.accommodations && filter.accommodations.length > 0) {
+          postData.accommodations.forEach((accommodationsOption) => {
+            if (filter.accommodations?.includes(accommodationsOption)) {
+              let divTag = document.createElement("div");
+              divTag.textContent = accommodationsOption;
+              filterTags.appendChild(divTag);
+            }
+          });
+        }
+
+        if (filter.experiences && filter.experiences.length > 0) {
+          postData.experiences.forEach((experiencesOption) => {
+            if (filter.experiences?.includes(experiencesOption)) {
+              let divTag = document.createElement("div");
+              divTag.textContent = experiencesOption;
+              filterTags.appendChild(divTag);
+            }
+          });
+        }
+
+        if (filter.environments && filter.environments.length > 0) {
+          postData.environments.forEach((environmentsOption) => {
+            if (filter.environments?.includes(environmentsOption)) {
+              let divTag = document.createElement("div");
+              divTag.textContent = environmentsOption;
+              filterTags.appendChild(divTag);
+            }
+          });
+        }
+
+        if (filter.meals && filter.meals.length > 0) {
+          postData.meals.forEach((mealsOption) => {
+            if (filter.meals?.includes(mealsOption)) {
+              let divTag = document.createElement("div");
+              divTag.textContent = mealsOption;
+              filterTags.appendChild(divTag);
+            }
+          });
+        }
+      }
+
+      // const accommodations = workPostTemplateClone.querySelector(
+      //   ".accommodations"
+      // ) as HTMLElement;
+      // if (accommodations && filter && filter.accommodations) {
+      //   if (filter.accommodations.length > 0) {
+      //     postData.accommodations.forEach((accommodationsOption) => {
+      //       if (filter.accommodations?.includes(accommodationsOption)) {
+      //         let divTag = document.createElement("div");
+      //         divTag.textContent = accommodationsOption;
+      //         accommodations.appendChild(divTag);
+      //       }
+      //     });
+      //   } else {
+      //     accommodations.style.display = "none";
+      //   }
+      // } else {
+      //   console.warn("Missing .accommodations element in template");
+      // }
+
+      // const experiences = workPostTemplateClone.querySelector(
+      //   ".experiences"
+      // ) as HTMLElement;
+      // if (experiences && filter && filter.experiences) {
+      //   if (filter.experiences.length > 0) {
+      //     postData.experiences.forEach((experiencesOption) => {
+      //       if (filter.experiences?.includes(experiencesOption)) {
+      //         let divTag = document.createElement("div");
+      //         divTag.textContent = experiencesOption;
+      //         experiences.appendChild(divTag);
+      //       }
+      //     });
+      //   } else {
+      //     experiences.style.display = "none";
+      //   }
+      // } else {
+      //   console.warn("Missing .experiences element in template");
+      // }
+
+      // const environments = workPostTemplateClone.querySelector(
+      //   ".environments"
+      // ) as HTMLElement;
+      // if (environments && filter && filter.environments) {
+      //   if (filter.environments.length > 0) {
+      //     postData.environments.forEach((environmentsOption) => {
+      //       if (filter.environments?.includes(environmentsOption)) {
+      //         let divTag = document.createElement("div");
+      //         divTag.textContent = environmentsOption;
+      //         environments.appendChild(divTag);
+      //       }
+      //     });
+      //   } else {
+      //     environments.style.display = "none";
+      //   }
+      // } else {
+      //   console.warn("Missing .environments element in template");
+      // }
+
+      // const meals = workPostTemplateClone.querySelector(
+      //   ".meals"
+      // ) as HTMLElement;
+      // if (meals && filter && filter.meals) {
+      //   if (filter.meals.length > 0) {
+      //     postData.meals.forEach((mealsOption) => {
+      //       if (filter.meals?.includes(mealsOption)) {
+      //         let divTag = document.createElement("div");
+      //         divTag.textContent = mealsOption;
+      //         meals.appendChild(divTag);
+      //       }
+      //     });
+      //   } else {
+      //     meals.style.display = "none";
+      //   }
+      // } else {
+      //   console.warn("Missing .meals element in template");
+      // }
+
+      const imagesDiv = workPostTemplateClone.querySelector(
+        ".work-post-images"
+      ) as HTMLElement;
+      if (imagesDiv) {
+        postData.images.forEach((image) => {
+          let imgTag = document.createElement("img");
+          imgTag.src = image;
+          imagesDiv.appendChild(imgTag);
+        });
+      } else {
+        console.warn("Missing .work-post-images element in template");
+      }
+      const images = imagesDiv.querySelectorAll("img");
+      if (images && images.length > 0) {
+        const prevBtn = workPostTemplateClone.querySelector(".right-arrow")!;
+        const nextBtn = workPostTemplateClone.querySelector(".left-arrow")!;
+        let currentIndex = 0;
+
+        const getTranslateXValue = () => {
+          let totalWidth = 0;
+          for (let i = 0; i < currentIndex; i++) {
+            // 使用 getBoundingClientRect() 獲取圖片的實際寬度
+            totalWidth += images[i].getBoundingClientRect().width;
+          }
+          return totalWidth;
+        };
+        nextBtn.addEventListener("click", () => {
+          if (currentIndex < images.length - 1) {
+            currentIndex++;
+            imagesDiv.style.transform = `translateX(-${getTranslateXValue()}px)`;
+          }
+        });
+
+        prevBtn.addEventListener("click", () => {
+          if (currentIndex > 0) {
+            currentIndex--;
+            imagesDiv.style.transform = `translateX(-${getTranslateXValue()}px)`;
+          }
+        });
+        window.addEventListener("resize", () => {
+          imagesDiv.style.transform = `translateX(-${getTranslateXValue()}px)`;
+        });
+      }
+
+      workPostSection.appendChild(workPostTemplateClone);
+    });
+  } else {
+    const noPost = document.getElementById("no-post") as HTMLDivElement;
+    noPost.style.display = "flex";
+    initSubscriptionBtn();
+  }
 }
 
 //初始化（取貼文資料、渲染貼文、渲染圖片）
@@ -212,7 +301,7 @@ async function initWorkPosts(filter?: WorkPostFilterInput) {
   try {
     const postsData: WorkPostForCardRender[] = await getWorkPosts(filter);
     console.log(postsData);
-    await renderWorkPosts(postsData);
+    await renderWorkPosts(postsData, filter);
     updateMarkers(postsData);
   } catch (error) {
     console.error("初始化失敗", error);
@@ -319,33 +408,54 @@ async function getCurrentUser() {
     return null;
   }
 }
-//初始化訂閱
-async function initSubscription() {
-  const filterSubscriptionBtn = document.getElementById(
-    "filter-subscription-btn"
-  ) as HTMLButtonElement;
+
+//初始化訂閱按鈕渲染與否
+const filterSubscriptionBtn = document.getElementById(
+  "filter-subscription-btn"
+) as HTMLButtonElement;
+const filterSubscriptionCta = document.getElementById(
+  "filter-subscription-cta"
+) as HTMLButtonElement;
+
+async function initSubscriptionBtn() {
   let token = localStorage.getItem("token");
   if (!token || token == "undefined") {
     filterSubscriptionBtn.style.display = "none";
+    filterSubscriptionCta.style.display = "none";
   } else {
     const userData = await getCurrentUser();
     if (userData) {
       if (userData.user.userType == "HELPER") {
         filterSubscriptionBtn.style.display = "inline-block";
+        filterSubscriptionCta.style.display = "block";
       } else {
         filterSubscriptionBtn.style.display = "none";
+        filterSubscriptionCta.style.display = "none";
       }
     } else {
       filterSubscriptionBtn.style.display = "none";
+      filterSubscriptionCta.style.display = "none";
     }
   }
+}
+initSubscriptionBtn();
 
-  //點擊訂閱
-  filterSubscriptionBtn.addEventListener("click", async () => {
-    //取得訂閱輸入資料
+//點擊訂閱後，跳出確認 dialog
+let currentFilter: WorkPostFilterInput | null = null;
+[filterSubscriptionCta, filterSubscriptionBtn].forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const responseMessage = document.querySelector(
+      ".subscription-response-message"
+    ) as HTMLDivElement;
+    if (responseMessage) {
+      responseMessage.textContent = "";
+    }
+    //關閉原本的 advanced-search dialog
+
+    //取得訂閱輸入資料，渲染於 dialog
     const startDateStr = picker.getStartDate()?.format("YYYY-MM-DD");
     const endDateStr = picker.getEndDate()?.format("YYYY-MM-DD");
-    let filter: WorkPostFilterInput = {
+    currentFilter = {
       city: getSelectedCity(),
       startDate: startDateStr,
       endDate: endDateStr,
@@ -361,25 +471,102 @@ async function initSubscription() {
       environments: getSelectedOptionValues(".environment-option-btn"),
     };
 
-    //將資料存入後端
-    let filterSubscribeResponse = await fetch(
-      `${API_BASE_URL}/api/subscription`,
-      {
+    //打開訂閱 dialog
+    const subscriptionDialog = document.getElementById(
+      "subscription-dialog"
+    ) as HTMLDialogElement;
+    subscriptionDialog.showModal();
+    subscriptionDialog.classList.add("show");
+    subscriptionDialog.addEventListener(
+      "click",
+      createDialogClickHandler(subscriptionDialog)
+    );
+    renderFilterDtails(currentFilter);
+  });
+});
+
+//點擊確認訂閱，取得訂閱輸入資料，連同 "filter-name" 存入後端
+const confirmBtn = document.getElementById("filter-subscription-confirm-btn");
+if (confirmBtn) {
+  confirmBtn.addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    const filterNameInput = document.getElementById(
+      "filter-name-input"
+    ) as HTMLInputElement;
+    const filterName = filterNameInput.value;
+
+    const responseMessage = document.querySelector(
+      ".subscription-response-message"
+    ) as HTMLDivElement;
+    if (!currentFilter) {
+      console.log("沒有currentFilter", currentFilter);
+      const responseMessage = document.querySelector(
+        ".subscription-response-message"
+      ) as HTMLDivElement;
+      if (responseMessage) {
+        responseMessage.textContent = "請先選擇篩選條件";
+        responseMessage.style.color = "red";
+      }
+      return;
+    }
+    if (!filterName) {
+      if (responseMessage) {
+        responseMessage.textContent = "請輸入訂閱名稱";
+        responseMessage.style.color = "red";
+      }
+      return;
+    }
+
+    currentFilter.name = filterName;
+
+    try {
+      //將資料存入後端
+      let res = await fetch(`${API_BASE_URL}/api/subscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(filter),
+        body: JSON.stringify(currentFilter),
+      });
+      if (!res.ok) throw new Error("Failed to update subscriptions");
+      const filterSubscribeResponseData = await res.json();
+
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("filterSubscribeResponseData", filterSubscribeResponseData);
       }
-    );
-    const filterSubscribeResponseData = await filterSubscribeResponse.json();
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("filterSubscribeResponseData", filterSubscribeResponseData);
+
+      if (responseMessage) {
+        responseMessage.textContent = "訂閱成功";
+        responseMessage.style.color = "green";
+      }
+
+      const subscriptionDialog = document.getElementById(
+        "subscription-dialog"
+      ) as HTMLDialogElement;
+      setTimeout(() => {
+        subscriptionDialog.close();
+        subscriptionDialog.classList.remove("show");
+        currentFilter = null; // 重置 currentFilter
+        responseMessage.textContent = "";
+        const filterDialog = document.getElementById(
+          "filter-dialog"
+        ) as HTMLDialogElement;
+        filterDialog.close();
+        filterDialog.classList.remove("show");
+      }, 2000);
+    } catch (error) {
+      console.error("訂閱失敗:", error);
+      const responseMessage = document.querySelector(
+        ".subscription-response-message"
+      );
+      if (responseMessage) {
+        responseMessage.textContent = "訂閱失敗，請稍後再試";
+      }
     }
   });
 }
-initSubscription();
 
 function toQueryString(params: Record<string, any>): string {
   const query = new URLSearchParams();
@@ -593,6 +780,9 @@ const searchOverlay = document.getElementById("search-overlay")!;
 const header = document.getElementById("header")!;
 const calendar = document.querySelector(".litepicker")!;
 const searchBtn = document.getElementById("search-btn");
+const main = document.querySelector("main")!;
+const mapSection = document.querySelector("#google-map") as HTMLElement;
+const workListSection = document.querySelector("#work-list") as HTMLElement;
 
 // 搜尋欄 Toggle 展開與收合
 searchSummary.addEventListener("click", (e) => {
@@ -602,6 +792,9 @@ searchSummary.addEventListener("click", (e) => {
   header.classList.add("active");
   searchSummary.style.display = "none";
   filterBtn.style.display = "none";
+  main.style.height = "calc(100vh - 180px)";
+  mapSection.style.height = "calc(100vh - 220px)";
+  workListSection.style.height = "calc(100vh - 180px)";
 });
 // 點擊外部或搜尋按鈕，收合搜尋欄
 searchBtn?.addEventListener("click", () => {
@@ -610,6 +803,9 @@ searchBtn?.addEventListener("click", () => {
   searchOverlay.classList.add("hidden");
   searchSummary.style.display = "flex";
   filterBtn.style.display = "block";
+  main.style.height = "calc(100vh - 110px)";
+  mapSection.style.height = "calc(100vh - 150px)";
+  workListSection.style.height = "calc(100vh - 110px)";
 });
 document.addEventListener("mousedown", (e) => {
   if (
@@ -621,41 +817,171 @@ document.addEventListener("mousedown", (e) => {
     searchOverlay.classList.add("hidden");
     searchSummary.style.display = "flex";
     filterBtn.style.display = "block";
+    main.style.height = "calc(100vh - 110px)";
+    mapSection.style.height = "calc(100vh - 150px)";
+    workListSection.style.height = "calc(100vh - 110px)";
   }
 });
 
 function initSearchSummary() {
-  const searchSummaryCity = document.getElementById(
-    "search-summary-city"
-  ) as HTMLDivElement;
-  const cityInput = document.getElementById("search-area") as HTMLInputElement;
-  if (cityInput.value) {
-    console.log("cityInput.textContent", cityInput.textContent);
-    searchSummaryCity.textContent = cityInput.value;
-  } else searchSummaryCity.textContent = "附近的去處";
+  const searchSummaryCity = document.getElementById("search-summary-city");
+  if (searchSummaryCity) {
+    const cityInput = document.getElementById(
+      "search-area"
+    ) as HTMLInputElement;
+    if (cityInput.value) {
+      console.log("cityInput.textContent", cityInput.textContent);
+      searchSummaryCity.textContent = cityInput.value;
+    } else {
+      searchSummaryCity.textContent = "附近的去處";
+    }
+  }
 
-  const searchSummaryDate = document.getElementById(
-    "search-summary-date"
-  ) as HTMLDivElement;
-  const dateInput = document.getElementById("date-range") as HTMLInputElement;
-  if (dateInput.value) {
-    console.log("dateInput.textContent", dateInput.textContent);
-    searchSummaryDate.textContent = dateInput.value;
-  } else {
-    searchSummaryDate.textContent = "任何時間";
+  const searchSummaryDate = document.getElementById("search-summary-date");
+  if (searchSummaryDate) {
+    const dateInput = document.getElementById("date-range") as HTMLInputElement;
+    if (dateInput.value) {
+      console.log("dateInput.textContent", dateInput.textContent);
+      searchSummaryDate.textContent = dateInput.value;
+    } else {
+      searchSummaryDate.textContent = "任何時間";
+    }
   }
 
   const searchSummaryCount = document.getElementById(
     "search-summary-count"
   ) as HTMLDivElement;
-  const countInput = document.getElementById(
-    "applicant-count"
-  ) as HTMLSelectElement;
+  if (searchSummaryCount) {
+    const countInput = document.getElementById(
+      "applicant-count"
+    ) as HTMLSelectElement;
 
-  if (countInput.value) {
-    searchSummaryCount.textContent = `${countInput.value} 人`;
-  } else {
-    searchSummaryCount.textContent = "新增人數";
+    if (countInput.value) {
+      searchSummaryCount.textContent = `${countInput.value} 人`;
+    } else {
+      searchSummaryCount.textContent = "新增人數";
+    }
   }
 }
 initSearchSummary();
+
+function renderFilterDtails(filter: WorkPostFilterInput) {
+  const filterDetailArea = document.getElementById(
+    "filter-detail-to-subscription"
+  ) as HTMLElement;
+
+  const endDate = filterDetailArea.querySelector(".filter-end-date");
+
+  const startDate = filterDetailArea.querySelector(".filter-start-date");
+  if (startDate && endDate) {
+    if (filter.endDate || filter.startDate) {
+      if (!filter.endDate) {
+        startDate.textContent = `${filter.startDate} 之後的所有日期`;
+      } else if (!filter.startDate) {
+        endDate.textContent = `${filter.endDate} 以前的所有日期`;
+      } else {
+        startDate.textContent = `${filter.startDate}`;
+        endDate.textContent = `至 ${filter.endDate} 之間`;
+      }
+    } else {
+      startDate.textContent = ``;
+      endDate.textContent = ``;
+    }
+  }
+
+  const city = filterDetailArea.querySelector(".filter-city");
+  if (city && filter.city) {
+    if ((filter.endDate || filter.startDate) && filter.applicantCount) {
+      city.textContent = `・位於${filter.city}・`;
+    } else if (filter.endDate || filter.startDate) {
+      city.textContent = `・位於${filter.city}`;
+    } else if (filter.applicantCount) {
+      city.textContent = `位於${filter.city}・`;
+    } else {
+      city.textContent = `位於${filter.city}`;
+    }
+  } else if (city && !filter.city) {
+    city.textContent = ``;
+  }
+
+  const applicantCount = filterDetailArea.querySelector(
+    ".filter-applicant-count"
+  );
+  if (applicantCount && filter.applicantCount) {
+    if (!filter.city && (filter.endDate || filter.startDate)) {
+      applicantCount.textContent = `・${filter.applicantCount} 人同行`;
+    } else {
+      applicantCount.textContent = `${filter.applicantCount} 人同行`;
+    }
+  } else if (applicantCount && !filter.applicantCount) {
+    applicantCount.textContent = ``;
+  }
+
+  const averageWorkHours = filterDetailArea.querySelector(
+    ".filter-average-work-hours"
+  );
+  if (averageWorkHours && filter.averageWorkHours) {
+    if (filter.minDuration) {
+      averageWorkHours.textContent = `每日工作 ${filter.averageWorkHours} 小時・`;
+    } else {
+      averageWorkHours.textContent = `每日工作 ${filter.averageWorkHours} 小時`;
+    }
+  } else if (averageWorkHours && !filter.averageWorkHours) {
+    averageWorkHours.textContent = ``;
+  }
+
+  const minDuration = filterDetailArea.querySelector(".filter-min-duration");
+  if (minDuration && filter.minDuration) {
+    minDuration.textContent = `接受最短停留 ${filter.minDuration} 天`;
+  } else if (minDuration && !filter.minDuration) {
+    minDuration.textContent = ``;
+  }
+
+  const positionCategories = filterDetailArea.querySelector(
+    ".filter-position-categories"
+  );
+  if (positionCategories && filter.positionCategories) {
+    if (filter.positionCategories.length > 0) {
+      positionCategories.textContent = `工作類別符合至少一項: ${filter.positionCategories}`;
+    } else {
+      positionCategories.textContent = ``;
+    }
+  }
+
+  const accommodations = filterDetailArea.querySelector(
+    ".filter-accommodations"
+  );
+  if (accommodations && filter.accommodations) {
+    if (filter.accommodations.length > 0) {
+      accommodations.textContent = `住宿選項包含至少一項: ${filter.accommodations}`;
+    } else {
+      accommodations.textContent = ``;
+    }
+  }
+
+  const environments = filterDetailArea.querySelector(".filter-environments");
+  if (environments && filter.environments) {
+    if (filter.environments.length > 0) {
+      environments.textContent = `環境選項包含至少一項: ${filter.environments}`;
+    } else {
+      environments.textContent = ``;
+    }
+  }
+  const experiences = filterDetailArea.querySelector(".filter-experiences");
+  if (experiences && filter.experiences) {
+    if (filter.experiences.length > 0) {
+      experiences.textContent = `體驗選項包含至少一項: ${filter.experiences}`;
+    } else {
+      experiences.textContent = ``;
+    }
+  }
+
+  const meals = filterDetailArea.querySelector(".filter-meals");
+  if (meals && filter.meals) {
+    if (filter.meals.length > 0) {
+      meals.textContent = `餐食選項包含至少一項: ${filter.meals}`;
+    } else {
+      meals.textContent = ``;
+    }
+  }
+}

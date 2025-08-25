@@ -105,9 +105,6 @@ body > main > section#summary > section#summary-wrap {
         font-weight: 600;
         margin-bottom: 15px;
       }
-      div#calendar {
-        margin: 15px 0px;
-      }
       div.available-info {
         display: flex;
         flex-direction: row;
@@ -121,7 +118,7 @@ body > main > section#summary > section#summary-wrap {
       }
     }
   }
-  button#apply-btn {
+  /* button#apply-btn {
     border: none;
     padding: 15px 30px;
     border-radius: 35px;
@@ -135,7 +132,7 @@ body > main > section#summary > section#summary-wrap {
     &:hover {
       background-color: rgb(97, 132, 92);
     }
-  }
+  } */
 }
 body > main > section#description {
   background-color: white;

@@ -115,6 +115,7 @@ export interface ScoredPost {
 
 //幫手的搜尋輸入
 export interface WorkPostFilterInput {
+  name?: string;
   city?: string;
   startDate?: string;
   endDate?: string;

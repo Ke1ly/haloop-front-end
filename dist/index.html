@@ -10,8 +10,9 @@
     ></script>
     <link rel="stylesheet" href="/css/share.css" />
     <link rel="stylesheet" href="/css/index.css" />
-    <script type="module" crossorigin src="/assets/main-DVulnmLO.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/nav-Bm98H60T.js">
+    <script type="module" crossorigin src="/assets/main-BQO_YHTe.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/config-BjgpUszF.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-yLXrFJ1f.js">
   </head>
 
   <body>
@@ -20,25 +21,29 @@
         <div class="left"><a href="#">換煥 Haloop</a></div>
         <div class="right">
           <i class="fa-solid fa-bell"></i>
-          <div id="notification-count">3</div>
+          <div id="notification-count" style="display: none">
+            <p id="notification-count-number"></p>
+          </div>
           <div id="menu-position-div">
             <div id="visitor-menu">
-              <div id="sign-up-div">註冊</div>
+              <a href="/signup.html"> <div id="sign-up-div">註冊</div></a>
+
+              <!-- <div id="sign-up-div">註冊</div> -->
               <div id="sign-in-div">登入</div>
             </div>
             <div id="helper-menu">
-              <div>收藏清單</div>
-              <div>訂閱</div>
+              <!-- <div>收藏清單</div> -->
+              <a href="/subscription.html"><div>訂閱</div></a>
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="host-menu">
-              <div>申請清單</div>
+              <!-- <div>申請清單</div> -->
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="notification-list"></div>
@@ -69,11 +74,11 @@
       <section class="landing-card odd">
         <div class="landing-card-text">
           <div class="landing-card-title">
-            <p>快速找到符合心意的換宿機會</p>
+            <p>多條件篩選，快速找到符合心意的換宿機會</p>
           </div>
           <div class="landing-card-content">
-            <p>於探索頁面設定搜尋條件，瀏覽店家</p>
-            <p>點選「訂閱條件」，有符合條件的新店家加入時，獲得通知</p>
+            <p>✴︎ 輸入想出發的日期、人數與城市，快速瀏覽店家</p>
+            <p>✴︎ 使用進階查詢功能，篩選工作細節與福利項目</p>
           </div>
         </div>
         <div class="landing-card-img"></div>
@@ -81,11 +86,11 @@
       <section class="landing-card even">
         <div class="landing-card-text">
           <div class="landing-card-title">
-            <p>排序收藏與管理申請順序</p>
+            <p>訂閱篩選條件，即時收到新店家加入的通知</p>
           </div>
           <div class="landing-card-content">
-            <p>於店家卡片上點選收藏</p>
-            <p>進入收藏頁面，拖曳排序</p>
+            <p>✴︎ 設定篩選條件時，點選訂閱條件按鈕，獲得通知</p>
+            <p>✴︎ 進入訂閱頁面，瀏覽已訂閱項目，及符合條件的貼文</p>
           </div>
         </div>
         <div class="landing-card-img"></div>
@@ -94,13 +99,22 @@
         <div class="landing-card-text">
           <div class="landing-card-title"><p>與有興趣的店家通訊</p></div>
           <div class="landing-card-content">
-            點擊發送訊息，即可詢問店家問題，不需交換私人聯絡方式
+            ✴︎
+            於換宿資訊頁面點擊發送訊息，即可詢問店家問題，不需交換私人聯絡方式
+          </div>
+        </div>
+        <div class="landing-card-img"></div>
+      </section>
+      <section class="landing-card even">
+        <div class="landing-card-text">
+          <div class="landing-card-title"><p>瀏覽專屬推薦</p></div>
+          <div class="landing-card-content">
+            ✴︎ 至少訂閱一組篩選條件，即可於首頁瀏覽每日專屬推薦貼文
           </div>
         </div>
         <div class="landing-card-img"></div>
       </section>
     </section>
-    <button id="to-sign-up-btn">立即註冊</button>
     <section id="popular-works"></section>
 
     <section id="recommendation">
@@ -157,41 +171,6 @@
         <button>切換為幫手身份</button>
       </form>
     </dialog>
-    <dialog id="sign-up-dialog">
-      <p>註冊</p>
-      <hr />
-      <form id="sign-up-form">
-        <input type="email" id="sign-up-email" placeholder="電子郵件" />
-        <div id="email-response-message"></div>
-
-        <input type="password" id="sign-up-passsword" placeholder="密碼" />
-        <div id="password-response-message"></div>
-
-        <input type="text" id="sign-up-username" placeholder="用戶名" />
-        <div id="username-response-message"></div>
-
-        <input type="text" id="sign-up-realname" placeholder="您的真實姓名" />
-        <div id="realname-response-message"></div>
-        <label>選擇一個身份開始體驗平台</label>
-        <div id="sign-up-role-div">
-          <button
-            class="sign-up-role selected"
-            data-value="HELPER"
-            type="button"
-          >
-            幫手
-          </button>
-          <button class="sign-up-role" data-value="HOST" type="button">
-            店家
-          </button>
-        </div>
-        <div id="userType-response-message"></div>
-        <button class="sign-up-submit-btn" type="submit">註冊</button>
-        <!-- <p>或</p>
-          <a href="">使用 Google 繼續</a> -->
-        <p id="sign-up-response-message"></p>
-      </form>
-    </dialog>
     <dialog id="sign-in-dialog">
       <p>登入</p>
       <hr />
@@ -219,6 +198,7 @@
         <!-- <p>或</p>
           <a href="">使用 Google 繼續</a> -->
         <p id="sign-in-response-message"></p>
+        <div>還沒有帳號？<a href="/signup.html">前往註冊</a></div>
       </form>
     </dialog>
   </body>

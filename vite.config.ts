@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { sign } from "crypto";
 
 export default defineConfig(({ mode }) => ({
   appType: "mpa",
@@ -42,6 +43,8 @@ export default defineConfig(({ mode }) => ({
         works: resolve(__dirname, "works.html"),
         chat: resolve(__dirname, "chat.html"),
         workpost: resolve(__dirname, "workpost.html"),
+        subscription: resolve(__dirname, "subscription.html"),
+        signup: resolve(__dirname, "signup.html"),
       },
     },
   },

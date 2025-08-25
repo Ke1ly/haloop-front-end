@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>註冊帳號｜換煥 Haloop</title>
+    <link rel="stylesheet" href="/css/signup.css" />
+    <script defer type="module" src="/src/pages/signup.js"></script>
+    <script
+      src="https://kit.fontawesome.com/adad1a32e8.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <main>
+      <section id="main-wrap">
+        <section class="left">
+          <img src="/img/hero2.jpg" alt="" />
+        </section>
+        <section class="right">
+          <section id="indicators">
+            <div id="indicator-step01" class="current-step"></div>
+            <div id="indicator-step02"></div>
+            <div id="indicator-step03"></div>
+          </section>
+          <section id="forms-container">
+            <section id="identity-selection">
+              <h3>選擇註冊身份</h3>
+              <div class="button-wrap">
+                <button
+                  data-identity="HELPER"
+                  class="sign-up-role"
+                  type="button"
+                >
+                  幫手
+                </button>
+                <button data-identity="HOST" class="sign-up-role" type="button">
+                  店家
+                </button>
+              </div>
+              <div id="page-1-response-message"></div>
+              <button class="page-1-next-page next-page">
+                <i class="fa-solid fa-circle-chevron-right"></i>
+              </button>
+            </section>
+            <section id="basic-form-container">
+              <h3>填寫帳號資訊</h3>
+              <form id="sign-up-form">
+                <input
+                  type="email"
+                  id="sign-up-email"
+                  placeholder="電子郵件"
+                  required
+                />
+                <input
+                  type="password"
+                  id="sign-up-password"
+                  placeholder="密碼"
+                  required
+                />
+                <input
+                  type="text"
+                  id="sign-up-username"
+                  placeholder="用戶名稱"
+                  required
+                />
+                <input
+                  type="text"
+                  id="sign-up-realname"
+                  placeholder="姓名"
+                  required
+                />
+              </form>
+              <div id="page-2-response-message"></div>
+              <button class="page-2-prev-page prev-page">
+                <i class="fa-solid fa-circle-chevron-left"></i>
+              </button>
+              <button class="page-2-next-page next-page">
+                <i class="fa-solid fa-circle-chevron-right"></i>
+              </button>
+            </section>
+            <section id="profile-form-container">
+              <h3>填寫基本資料</h3>
+              <form id="host-profile-form">
+                <input
+                  type="text"
+                  id="host-profile-unit-name"
+                  placeholder="單位名稱"
+                  required
+                />
+                <input
+                  type="text"
+                  id="host-profile-unit-address"
+                  placeholder="地址"
+                  required
+                />
+                <input
+                  type="text"
+                  list="city-list"
+                  id="host-profile-unit-city"
+                  placeholder="所在縣市"
+                  required
+                />
+                <datalist id="city-list">
+                  <option value="基隆市">基隆市</option>
+                  <option value="臺北市">臺北市</option>
+                  <option value="新北市">新北市</option>
+                  <option value="桃園市">桃園市</option>
+                  <option value="新竹市">新竹市</option>
+                  <option value="新竹縣">新竹縣</option>
+                  <option value="苗栗縣">苗栗縣</option>
+                  <option value="臺中市">臺中市</option>
+                  <option value="彰化縣">彰化縣</option>
+                  <option value="南投縣">南投縣</option>
+                  <option value="雲林縣">雲林縣</option>
+                  <option value="嘉義縣">嘉義縣</option>
+                  <option value="嘉義市">嘉義市</option>
+                  <option value="臺南市">臺南市</option>
+                  <option value="高雄市">高雄市</option>
+                  <option value="屏東縣">屏東縣</option>
+                  <option value="宜蘭縣">宜蘭縣</option>
+                  <option value="花蓮縣">花蓮縣</option>
+                  <option value="臺東縣">臺東縣</option>
+                  <option value="澎湖縣">澎湖縣</option>
+                  <option value="金門縣">金門縣</option>
+                  <option value="連江縣">連江縣</option>
+                </datalist>
+                <textarea
+                  id="host-profile-unit-description"
+                  placeholder="單位簡介"
+                  required
+                ></textarea>
+              </form>
+              <form id="helper-profile-form">
+                <textarea
+                  id="helper-profile-bio"
+                  placeholder="自我介紹"
+                ></textarea>
+
+                <p id="sign-up-response-message"></p>
+                <button class="prev-page">
+                  <i class="fa-solid fa-circle-chevron-left"></i>
+                </button>
+
+                <!-- <button class="helper-sign-up-submit-btn" type="button">
+                  註冊
+                </button> -->
+              </form>
+              <div id="page-3-response-message"></div>
+              <button class="page-3-prev-page prev-page">
+                <i class="fa-solid fa-circle-chevron-left"></i>
+              </button>
+              <button class="sign-up-submit-btn" type="button">註冊</button>
+            </section>
+          </section>
+          <!-- <div id="switch-to-login">
+            或者
+            <span>登入現有帳號</span>
+          </div> -->
+        </section>
+      </section>
+    </main>
+
+    <dialog id="error-dialog">
+      <div class="error-message"></div>
+      <button>關閉</button>
+    </dialog>
+  </body>
+</html>

@@ -90,46 +90,52 @@
               </div>
             </section>
             <button id="filter-search-btn">
-              <i class="fa-solid fa-sliders"></i> 篩選條件
+              <i class="fa-solid fa-sliders"></i> <span>篩選條件</span>
             </button>
           </section>
         </div>
         <div class="right">
           <i class="fa-solid fa-bell"></i>
-          <div id="notification-count">3</div>
+          <div id="notification-count" style="display: none">
+            <p id="notification-count-number"></p>
+          </div>
           <div id="menu-position-div">
             <div id="visitor-menu">
               <div id="sign-up-div">註冊</div>
               <div id="sign-in-div">登入</div>
             </div>
             <div id="helper-menu">
-              <div>收藏清單</div>
-              <div>訂閱</div>
+              <!-- <div>收藏清單</div> -->
+              <a href="/subscription.html"><div>訂閱</div></a>
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="host-menu">
-              <div>申請清單</div>
+              <!-- <div>申請清單</div> -->
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="notification-list"></div>
           </div>
           <button id="show-menu-btn">
             <i class="fa-solid fa-bars"></i>
-            <i class="fa-solid fa-user"></i>
           </button>
         </div>
       </div>
     </header>
-
+    <div id="search-overlay" class="hidden"></div>
     <main>
-      <div id="search-overlay" class="hidden"></div>
-      <section id="work-list"></section>
+      <section id="work-list">
+        <section id="no-post">
+          <div>沒有符合條件的貼文</div>
+          <button id="filter-subscription-cta">訂閱這組條件</button>
+        </section>
+        <section id="posts"></section>
+      </section>
       <section id="google-map"></section>
     </main>
     <template id="work-post-template">
@@ -146,23 +152,16 @@
             <div class="work-post-images"></div>
           </section>
           <section class="work-post-right">
-            <div class="position-div">
-              <p class="position-name"></p>
-            </div>
-            <div>
-              <p class="unit-name"></p>
-            </div>
-            <div>
-              <p>平均每日工時 <span class="avg-work-hours"></span> 小時</p>
-              <p>｜ 最短停留<span class="min-stay-days"></span></p>
-            </div>
-
-            <div class="position-categories"></div>
-
+            <div class="position-name"></div>
+            <div class="unit-name"></div>
+            <div class="avg-work-hours"></div>
+            <div class="min-stay-days"></div>
+            <div class="filter-tags"></div>
+            <!-- <div class="position-categories"></div>
             <div class="accommodations"></div>
             <div class="experiences"></div>
             <div class="environments"></div>
-            <div class="meals"></div>
+            <div class="meals"></div> -->
           </section>
         </a>
       </section>
@@ -339,6 +338,7 @@
       <h5>平均每日工時</h5>
       <label for="average-work-hours">平均每日工時小於</label>
       <select id="average-work-hours">
+        <option value="" selected disabled>選擇平均工時</option>
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -349,7 +349,8 @@
       <h5>最短停留</h5>
       <label for="min-stay-days">接受最短停留</label>
       <select id="min-stay-days">
-        <option value="0">無限制</option>
+        <option value="" selected disabled>選擇停留長度</option>
+        <option value="1">無限制</option>
         <option value="7">一週</option>
         <option value="14">兩週</option>
         <option value="21">三週</option>
@@ -652,7 +653,7 @@
       <button id="start-filter-search-btn">開始查詢</button>
       <button id="filter-subscription-btn">訂閱這組條件</button>
     </dialog>
-    <dialog id="sign-up-dialog">
+    <!-- <dialog id="sign-up-dialog">
       <p>註冊</p>
       <hr />
       <form id="sign-up-form">
@@ -674,11 +675,9 @@
           </button>
         </div>
         <button class="sign-up-submit-btn" type="submit">註冊</button>
-        <!-- <p>或</p>
-          <a href="">使用 Google 繼續</a> -->
         <p id="sign-up-response-message"></p>
       </form>
-    </dialog>
+    </dialog> -->
     <dialog id="sign-in-dialog">
       <p>登入</p>
       <hr />
@@ -689,7 +688,7 @@
           placeholder="請輸入電子郵件地址"
         />
         <input type="password" id="sign-in-password" placeholder="請輸入密碼" />
-        <label>選擇登入身份</label>
+        <!-- <label>選擇登入身份</label>
         <div id="sign-in-role-div">
           <button
             class="sign-in-role selected"
@@ -701,12 +700,46 @@
           <button class="sign-in-role" data-value="HOST" type="button">
             店家
           </button>
-        </div>
+        </div> -->
         <button class="sign-in-submit-btn">登入</button>
         <!-- <p>或</p>
           <a href="">使用 Google 繼續</a> -->
         <p id="sign-in-response-message"></p>
+        <div>還沒有帳號？<a href="/signup.html">前往註冊</a></div>
       </form>
+    </dialog>
+    <dialog id="subscription-dialog">
+      <div class="dialog-title">訂閱符合整組條件的貼文</div>
+      <hr />
+      <div id="filter-detail-to-subscription">
+        <div>
+          <span class="filter-start-date"></span>
+          <span class="filter-end-date"></span>
+          <span class="filter-city"></span>
+          <span class="filter-applicant-count"></span>
+        </div>
+
+        <div>
+          <span class="filter-average-work-hours"></span
+          ><span class="filter-min-duration"></span>
+        </div>
+
+        <div>
+          <div><span class="filter-position-categories"></span></div>
+          <div><span class="filter-accommodations"></span></div>
+          <div><span class="filter-environments"></span></div>
+          <div><span class="filter-experiences"></span></div>
+          <div><span class="filter-meals"></span></div>
+        </div>
+      </div>
+      <form>
+        <label for="">為這組條件命名</label>
+        <input type="text" id="filter-name-input" />
+        <button id="filter-subscription-confirm-btn" type="button">
+          確認訂閱
+        </button>
+      </form>
+      <div class="subscription-response-message"></div>
     </dialog>
   </body>
 </html>

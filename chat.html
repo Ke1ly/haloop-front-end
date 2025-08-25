@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Demo</title>
+    <title>即時聊天｜換煥 Haloop</title>
     <script
       src="https://kit.fontawesome.com/adad1a32e8.js"
       crossorigin="anonymous"
@@ -19,25 +19,27 @@
         <div class="left"><a href="/">換煥 Haloop</a></div>
         <div class="right">
           <i class="fa-solid fa-bell"></i>
-          <div id="notification-count">3</div>
+          <div id="notification-count" style="display: none">
+            <p id="notification-count-number"></p>
+          </div>
           <div id="menu-position-div">
             <div id="visitor-menu">
               <div id="sign-up-div">註冊</div>
               <div id="sign-in-div">登入</div>
             </div>
             <div id="helper-menu">
-              <div>收藏清單</div>
-              <div>訂閱</div>
+              <!-- <div>收藏清單</div> -->
+              <a href="/subscription.html"><div>訂閱</div></a>
               <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="host-menu">
-              <div>申請清單</div>
-              <div>訊息</div>
+              <!-- <div>申請清單</div> -->
+              <a href="/chat.html"><div>訊息</div></a>
               <hr />
-              <div class="account-management-btn">帳號</div>
+              <a href="/account.html"><div>帳號</div></a>
               <div class="log-out-btn">登出</div>
             </div>
             <div id="notification-list"></div>
@@ -58,7 +60,11 @@
         <section id="chat-header">
           <div id="chat-header-left">
             <div>
-              <img id="header-other-avatar" src="" alt="" />
+              <img
+                id="header-other-avatar"
+                src="/img/user-default.png"
+                alt=""
+              />
             </div>
             <div id="header-other-username"></div>
           </div>
@@ -70,7 +76,16 @@
             <p id="currentConversationTitle">選擇一個對話開始聊天</p>
           </div>
         </section>
-        <section id="messages-container"></section>
+        <section id="messages-container">
+          <div id="messages-content"></div>
+          <div id="typing-indicator-wrap">
+            <div id="typing-indicator">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+        </section>
         <section id="message-input-container">
           <form id="message-input-form">
             <textarea id="message-input" placeholder="輸入訊息..."></textarea>
@@ -112,61 +127,5 @@
         </div>
       </section>
     </template>
-    <dialog id="sign-up-dialog">
-      <p>註冊</p>
-      <hr />
-      <form id="sign-up-form">
-        <input type="email" id="sign-up-email" placeholder="電子郵件" />
-        <input type="password" id="sign-up-passsword" placeholder="密碼" />
-        <input type="text" id="sign-up-username" placeholder="用戶名" />
-        <input type="text" id="sign-up-realname" placeholder="您的真實姓名" />
-        <label>選擇一個身份開始體驗平台</label>
-        <div id="sign-up-role-div">
-          <button
-            class="sign-up-role selected"
-            data-value="HELPER"
-            type="button"
-          >
-            幫手
-          </button>
-          <button class="sign-up-role" data-value="HOST" type="button">
-            店家
-          </button>
-        </div>
-        <button class="sign-up-submit-btn" type="submit">註冊</button>
-        <!-- <p>或</p>
-          <a href="">使用 Google 繼續</a> -->
-        <p id="sign-up-response-message"></p>
-      </form>
-    </dialog>
-    <dialog id="sign-in-dialog">
-      <p>登入</p>
-      <hr />
-      <form id="sign-in-form">
-        <input
-          type="email"
-          id="sign-in-email"
-          placeholder="請輸入電子郵件地址"
-        />
-        <input type="password" id="sign-in-password" placeholder="請輸入密碼" />
-        <label>選擇登入身份</label>
-        <div id="sign-in-role-div">
-          <button
-            class="sign-in-role selected"
-            data-value="HELPER"
-            type="button"
-          >
-            幫手
-          </button>
-          <button class="sign-in-role" data-value="HOST" type="button">
-            店家
-          </button>
-        </div>
-        <button class="sign-in-submit-btn">登入</button>
-        <!-- <p>或</p>
-          <a href="">使用 Google 繼續</a> -->
-        <p id="sign-in-response-message"></p>
-      </form>
-    </dialog>
   </body>
 </html>

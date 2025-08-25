@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>訂閱內容｜換煥 Haloop</title>
+    <script
+      src="https://kit.fontawesome.com/adad1a32e8.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/css/share.css" />
+    <link rel="stylesheet" href="/css/subscription.css" />
+    <script defer type="module" src="/src/pages/nav.ts"></script>
+    <script defer type="module" src="/src/pages/subscription.ts"></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="left"><a href="/">換煥 Haloop</a></div>
+        <div class="right">
+          <i class="fa-solid fa-bell"></i>
+          <div id="notification-count" style="display: none">
+            <p id="notification-count-number"></p>
+          </div>
+
+          <div id="menu-position-div">
+            <div id="visitor-menu">
+              <div id="sign-up-div">註冊</div>
+              <div id="sign-in-div">登入</div>
+            </div>
+            <div id="helper-menu">
+              <!-- <div>收藏清單</div> -->
+              <a href="/subscription.html"><div>訂閱</div></a>
+              <a href="/chat.html"><div>訊息</div></a>
+              <hr />
+              <a href="/account.html"><div>帳號</div></a>
+              <div class="log-out-btn">登出</div>
+            </div>
+            <div id="host-menu">
+              <!-- <div>申請清單</div> -->
+              <a href="/chat.html"><div>訊息</div></a>
+              <hr />
+              <a href="/account.html"><div>帳號</div></a>
+              <div class="log-out-btn">登出</div>
+            </div>
+            <div id="notification-list"></div>
+          </div>
+          <button id="show-menu-btn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section id="main-area-wrap">
+        <div class="title">您所訂閱的條件組合</div>
+        <section id="subscription-area-wrap">
+          <nav></nav>
+          <section id="filtered-posts">
+            <section id="filter-details">
+              <div>
+                <span class="filter-start-date"></span>
+                <span class="filter-end-date"></span>
+                <span class="filter-city"></span>
+                <span class="filter-applicant-count"></span>
+              </div>
+
+              <div>
+                <span class="filter-average-work-hours"></span
+                ><span class="filter-min-duration"></span>
+              </div>
+
+              <div>
+                <div><span class="filter-position-categories"></span></div>
+                <div><span class="filter-accommodations"></span></div>
+                <div><span class="filter-environments"></span></div>
+                <div><span class="filter-experiences"></span></div>
+                <div><span class="filter-meals"></span></div>
+              </div>
+            </section>
+            <section id="matched-posts-list"></section>
+          </section>
+        </section>
+      </section>
+    </main>
+    <template id="matched-post-template">
+      <section class="matched-post">
+        <a>
+          <section class="matched-post-left">
+            <!-- <div class="favorite-btn"></div> -->
+            <div class="matched-post-image"></div>
+          </section>
+          <section class="matched-post-right">
+            <div class="post-name">
+              <div class="position-name"></div>
+
+              <div class="unit-name"></div>
+            </div>
+
+            <div class="post-info">
+              <div class="avg-work-hours"></div>
+
+              <div class="min-stay-days"></div>
+            </div>
+
+            <div class="position-categories"></div>
+            <div class="accommodations"></div>
+            <div class="experiences"></div>
+            <div class="environments"></div>
+            <div class="meals"></div>
+          </section>
+        </a>
+      </section>
+    </template>
+  </body>
+</html>

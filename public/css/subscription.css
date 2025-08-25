@@ -1,0 +1,232 @@
+body > main {
+  max-width: 1200px;
+  margin: 0px auto;
+}
+body > main > section#main-area-wrap {
+  margin: 10px;
+}
+body > main > section#main-area-wrap > section#subscription-area-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin: 10px 0px;
+  height: calc(100vh - 150px);
+}
+
+body > main > section#main-area-wrap > section#subscription-area-wrap > nav {
+  border-radius: 15px;
+  background-color: white;
+  margin: 10px 5px;
+  flex-basis: 150px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  padding: 0px 10px;
+  padding-top: 20px;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  scroll-behavior: smooth;
+  div {
+    padding: 10px 20px;
+    border-radius: 15px;
+    background-color: rgb(223, 223, 223);
+    margin-bottom: 10px;
+    cursor: pointer;
+    &:hover {
+      background-color: rgb(200, 200, 200);
+    }
+  }
+  /* div.selected {
+    background-color: rgb(200, 200, 200);
+  } */
+}
+body
+  > main
+  > section#main-area-wrap
+  > section#subscription-area-wrap
+  > section#filtered-posts {
+  flex-basis: 500px;
+  flex-grow: 4;
+  flex-shrink: 1;
+  margin: 10px 5px;
+  background-color: white;
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+body
+  > main
+  > section#main-area-wrap
+  > section#subscription-area-wrap
+  > section#filtered-posts
+  > section#filter-details {
+  flex-basis: 10px;
+  flex-grow: 0;
+  flex-shrink: 1;
+  padding: 15px;
+  /* border-left: 5px solid black; */
+  border: 2px solid rgb(232, 223, 223);
+  border-bottom: 5px solid rgb(232, 223, 223);
+  border-radius: 15px;
+  /* background-color: rgb(225, 225, 225); */
+  display: none;
+}
+
+body
+  > main
+  > section#main-area-wrap
+  > section#subscription-area-wrap
+  > section#filtered-posts
+  > section#matched-posts-list {
+  flex-basis: 500px;
+  flex-grow: 1;
+  flex-shrink: 2;
+  margin-top: 5px;
+
+  padding: 15px;
+  border-radius: 15px;
+
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  scroll-behavior: smooth;
+}
+
+body
+  > main
+  > section#main-area-wrap
+  > section#subscription-area-wrap
+  > section#filtered-posts
+  > section#matched-posts-list
+  > section.matched-post
+  > a {
+  /* border: 2px solid magenta; */
+  text-decoration: none;
+  color: inherit;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+
+  border-radius: 20px;
+  &:hover {
+    background-color: aliceblue;
+  }
+
+  section.matched-post-left {
+    div.matched-post-image {
+      img {
+        width: 150px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 15px;
+      }
+    }
+  }
+  section.matched-post-right {
+    margin-left: 20px;
+    div.post-name,
+    div.post-info {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 3px;
+      font-weight: 500;
+      div {
+        margin-right: 3px;
+      }
+    }
+    div.position-categories,
+    div.accommodations,
+    div.experiences,
+    div.environments,
+    div.meals {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 5px;
+      h5 {
+        font-weight: 400;
+        font-size: 14px;
+      }
+      div {
+        font-size: 13px;
+        padding: 3px 10px;
+        margin: 0px 3px;
+        background-color: rgb(242, 236, 228);
+        border-radius: 20px;
+      }
+    }
+  }
+}
+
+/* 
+body > main > aside {
+  display: flex;
+  flex-direction: column;
+  div.title {
+    margin: 0px 20px;
+    font-size: 20px;
+  }
+}
+
+body > main > aside > div#subscriptions-list {
+  margin: 10px 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  div.subscription-item {
+    border-radius: 30px;
+    padding: 20px;
+    background-color: rgb(255, 255, 255);
+    margin-bottom: 20px;
+    margin-right: 20px;
+    div.subscription-filter-name {
+      font-weight: 500;
+      color: rgb(100, 87, 87);
+      margin-bottom: 10px;
+      font-size: 17px;
+    }
+  }
+}
+
+body
+  > main
+  > aside
+  > div#subscriptions-list
+  > div.subscription-item
+  > div.subscription-filter-details {
+  div.subscription-filter-details-top,
+  div.subscription-filter-details-middle {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+    color: rgb(100, 87, 87);
+    font-size: 17px;
+  }
+  div.subscription-filter-details-bottom {
+    color: rgb(162, 157, 157);
+    font-size: 15px;
+    div {
+      margin-bottom: 3px;
+    }
+  }
+} */
