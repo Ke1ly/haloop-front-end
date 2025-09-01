@@ -27,6 +27,24 @@ body > main > section#main-wrap > section.left {
   flex-basis: 400px;
   flex-grow: 0;
   flex-shrink: 1;
+  position: relative;
+  div#back-to-homepage-btn {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(202, 195, 195);
+    padding: 10px 20px;
+    margin: 20px;
+    cursor: pointer;
+    border-radius: 20px;
+    &:hover {
+      box-shadow: 1px 1px 5px rgba(187, 187, 187, 0.8);
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
   img {
     height: 100%;
     width: 100%;

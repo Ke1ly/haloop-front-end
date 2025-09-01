@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { API_BASE_URL } from "../../utils/config";
 
 type SocketConfig = {
   token: string;
@@ -69,11 +70,11 @@ export const connectToSocket = (config: SocketConfig): Promise<void> => {
       socketState.socket.disconnect();
     }
 
-    socketState.socket = io(window.location.origin, {
+    socketState.socket = io(`${API_BASE_URL}`, {
       auth: { token: config.token },
       // query: { page: config.pageName },
       transports: ["websocket", "polling"],
-      reconnection: false, // 自行控制重連邏輯
+      reconnection: false,
     });
 
     socketState.socket.on("connect", () => {

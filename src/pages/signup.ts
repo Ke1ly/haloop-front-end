@@ -214,7 +214,7 @@ async function submitRegistration(identity: string) {
       showResponse("page-3-response-message", "註冊成功！請登入開始使用");
       setTimeout(() => {
         // 重置
-        window.location.assign("./index");
+        window.location.assign("./");
       }, 2000);
     } else {
       let errorMessages = [];
