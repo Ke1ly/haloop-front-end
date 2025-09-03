@@ -41,9 +41,6 @@ function renderSubscriptionsName(subscriptionsData: Subscription[]) {
   const nav = document.querySelector("nav");
   const filterDetails = document.getElementById("filter-details");
   if (subscriptionsData && subscriptionsData.length > 0) {
-    if (filterDetails) {
-      filterDetails.replaceChildren();
-    }
     console.log("subscriptionsData", subscriptionsData);
     subscriptionsData.forEach((subscriptionData) => {
       let div = document.createElement("div");
@@ -64,7 +61,6 @@ function renderSubscriptionsName(subscriptionsData: Subscription[]) {
     div2.textContent =
       "開始訂閱，請前往 [探索頁面] 設定篩選條件，然後點選訂閱按鈕。";
     if (filterDetails) {
-      filterDetails.style.display = "block";
       filterDetails.appendChild(div1);
       filterDetails.appendChild(div2);
     }
@@ -75,9 +71,6 @@ async function renderSubscriptionDetails(subscriptionId: string) {
   const detailsContainer = document.getElementById("filter-details");
 
   if (!subscriptionsData) {
-    if (detailsContainer) {
-      detailsContainer.replaceChildren();
-    }
     return;
   }
 
@@ -86,25 +79,16 @@ async function renderSubscriptionDetails(subscriptionId: string) {
   );
   if (!subscription) {
     console.error("找不到對應的訂閱資料");
-    if (detailsContainer) {
-      detailsContainer.replaceChildren();
-    }
     return;
   } else {
     console.log("成功找到對應subscription", subscription);
   }
-  if (detailsContainer) {
-    detailsContainer.style.display = "block";
-    // 清空現有內容
-    // detailsContainer.replaceChildren();
-    const filter = subscription.filters;
-    console.log("取filter", filter);
-    console.log("filter.endDate", filter.endDate);
-    console.log(" filter.city", filter.city);
-    console.log("filter.positionCategories", filter.positionCategories);
-    console.log("filter.applicantCount", filter.applicantCount);
-    // 創建並顯示 filters 詳情
 
+  if (detailsContainer) {
+    // 清空現有內容
+    const filter = subscription.filters;
+    console.log("要用來渲染的 filter", filter);
+    // 創建並顯示 filters 詳情
     const endDate = document.querySelector(".filter-end-date");
     const startDate = document.querySelector(".filter-start-date");
     if (startDate && endDate) {
@@ -218,7 +202,7 @@ async function renderSubscriptionDetails(subscriptionId: string) {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/subscription/${subscriptionId}/matched-posts`,
+      `${API_BASE_URL}/api/subscription/matched-posts?id=${subscriptionId}`,
       {
         method: "GET",
         headers: {
@@ -254,7 +238,7 @@ async function renderSubscriptionDetails(subscriptionId: string) {
           const postA = matchedPostTemplateClone.querySelector(
             "a"
           ) as HTMLAnchorElement;
-          postA.href = `/workpost/${postData.id}`;
+          postA.href = `/workpost.html?id=${postData.id}`;
           postA.target = "_blank";
 
           const positionName = matchedPostTemplateClone.querySelector(

@@ -62,7 +62,7 @@ async function renderWorkPosts(
       const postA = workPostTemplateClone.querySelector(
         "a"
       ) as HTMLAnchorElement;
-      postA.href = `/workpost/${postData.id}`;
+      postA.href = `/workpost.html?id=${postData.id}`;
       postA.target = "_blank";
 
       const positionName = workPostTemplateClone.querySelector(

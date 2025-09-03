@@ -27,13 +27,16 @@ loadGoogleMaps()
   .catch(console.error);
 
 //取得欲渲染的 workpostId
-const pathParts = window.location.pathname.split("/");
-let workpostId = pathParts[pathParts.length - 1];
+const urlParams = new URLSearchParams(window.location.search);
+let workpostId = urlParams.get("id");
 
 async function getWorkPost(): Promise<WorkPostForPageRender> {
-  const response = await fetch(`${API_BASE_URL}/api/workpost/${workpostId}`, {
-    method: "GET",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/workpost?id=${workpostId}`,
+    {
+      method: "GET",
+    }
+  );
   if (!response.ok) throw new Error("Failed to fetch work post");
   const data = await response.json();
   return data;

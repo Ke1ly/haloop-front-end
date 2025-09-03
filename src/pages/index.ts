@@ -49,7 +49,7 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
     ) as DocumentFragment;
 
     const A = recommendation.querySelector("a") as HTMLAnchorElement;
-    A.href = `/workpost/${postData.id}`;
+    A.href = `/workpost.html?id=${postData.id}`;
     A.target = "_blank";
 
     const positionName = recommendation.querySelector(".position-name");
