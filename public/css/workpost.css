@@ -193,7 +193,7 @@ body > main > section#profile {
   max-width: 1200px;
   margin: 0px auto;
   margin-top: 40px;
-
+  margin-bottom: 40px;
   h5 {
     font-size: 24px;
     margin-bottom: 10px;
@@ -206,6 +206,10 @@ body > main > section#profile {
     flex-wrap: wrap;
     justify-content: start;
     div.host-profile {
+      display: flex;
+      flex-direction: row;
+      align-items: start;
+
       padding: 20px 20px;
       border-radius: 40px;
       background-color: rgba(255, 255, 255, 0.4);
@@ -214,17 +218,26 @@ body > main > section#profile {
       display: flex;
       flex-direction: row;
       div.host-profile-left {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
         margin-right: 10px;
         div.unit-avatar {
-          width: 100px;
-          height: 100px;
-          border: 1px solid lightgray;
-          border-radius: 50%;
-          margin-bottom: 10px;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0px 0px 5px rgba(152, 152, 152, 0.6);
+          }
+        }
+      }
+      div.host-profile-right {
+        margin-left: 10px;
+        div.profile-unit-name {
+          font-weight: 500;
+          font-size: 18px;
         }
       }
     }

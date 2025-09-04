@@ -41,13 +41,14 @@ function renderSubscriptionsName(subscriptionsData: Subscription[]) {
   const nav = document.querySelector("nav");
   const filterDetails = document.getElementById("filter-details");
   if (subscriptionsData && subscriptionsData.length > 0) {
-    console.log("subscriptionsData", subscriptionsData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("當前頁面渲染的 subscriptionsData", subscriptionsData);
+    }
     subscriptionsData.forEach((subscriptionData) => {
       let div = document.createElement("div");
       div.textContent = subscriptionData.name;
       div.dataset.subscriptionId = subscriptionData.id;
       div.addEventListener("click", () => {
-        console.log("點擊filterName，subscriptionData.id", subscriptionData.id);
         renderSubscriptionDetails(subscriptionData.id);
       });
       if (nav) {
@@ -78,16 +79,19 @@ async function renderSubscriptionDetails(subscriptionId: string) {
     (sub) => sub.id === subscriptionId
   );
   if (!subscription) {
-    console.error("找不到對應的訂閱資料");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error(`找不到 ${subscriptionId} 對應的訂閱資料`);
+    }
     return;
   } else {
-    console.log("成功找到對應subscription", subscription);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("當前頁面渲染的 subscription detail", subscription);
+    }
   }
 
   if (detailsContainer) {
     // 清空現有內容
     const filter = subscription.filters;
-    console.log("要用來渲染的 filter", filter);
     // 創建並顯示 filters 詳情
     const endDate = document.querySelector(".filter-end-date");
     const startDate = document.querySelector(".filter-start-date");
@@ -214,7 +218,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
     if (!response.ok) throw new Error("無法取得匹配貼文");
     const data = await response.json();
     const matchedPosts = data.matchedPosts;
-    console.log("matchedPosts", matchedPosts);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("當前頁面渲染的 matchedPosts", matchedPosts);
+    }
 
     // 渲染貼文列表
     const postsList = document.getElementById("matched-posts-list");
@@ -247,7 +253,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
           if (positionName) {
             positionName.textContent = postData.positionName;
           } else {
-            console.warn("Missing .position-name element in template");
+            if (import.meta.env.VITE_MODE == "development") {
+              console.warn("Missing .position-name element in template");
+            }
           }
 
           const unitName = matchedPostTemplateClone.querySelector(
@@ -256,7 +264,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
           if (unitName) {
             unitName.textContent = `@ ${postData.unit.unitName!}`;
           } else {
-            console.warn("Missing .unit-name element in template");
+            if (import.meta.env.VITE_MODE == "development") {
+              console.warn("Missing .unit-name element in template");
+            }
           }
 
           const avgWorkHours = matchedPostTemplateClone.querySelector(
@@ -265,7 +275,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
           if (avgWorkHours) {
             avgWorkHours.textContent = `平均每日工時 ${postData.averageWorkHours} 小時｜`;
           } else {
-            console.warn("Missing .avg-work-hours element in template");
+            if (import.meta.env.VITE_MODE == "development") {
+              console.warn("Missing .avg-work-hours element in template");
+            }
           }
 
           const minDuration = matchedPostTemplateClone.querySelector(
@@ -288,7 +300,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
               minDuration.textContent = "最短停留兩個月以上";
             }
           } else {
-            console.warn("Missing .min-stay-days element in template");
+            if (import.meta.env.VITE_MODE == "development") {
+              console.warn("Missing .min-stay-days element in template");
+            }
           }
 
           const positionCategories = matchedPostTemplateClone.querySelector(
@@ -377,7 +391,9 @@ async function renderSubscriptionDetails(subscriptionId: string) {
             imgTag.src = postData.images[0].imageUrl;
             imagesDiv.appendChild(imgTag);
           } else {
-            console.warn("Missing .work-post-images element in template");
+            if (import.meta.env.VITE_MODE == "development") {
+              console.warn("Missing .work-post-images element in template");
+            }
           }
 
           postsList.appendChild(matchedPostTemplateClone);
@@ -385,7 +401,10 @@ async function renderSubscriptionDetails(subscriptionId: string) {
       }
     }
   } catch (error) {
-    console.error("取得匹配貼文失敗", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("取得 matchedPosts 失敗", error);
+    }
+
     const postsList = document.getElementById("matched-posts-list");
     if (postsList) postsList.textContent = "目前無符合的貼文";
   }
@@ -397,23 +416,13 @@ async function getCurrentUser() {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
-
   if (!res.ok) {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.error("Response not OK:", res.status);
-    }
     return null;
   }
   let data = await res.json();
   if (data.success) {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return data;
   } else {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return null;
   }
 }
@@ -430,7 +439,9 @@ async function initSubscription() {
       location.replace("/");
     }
   } catch (error) {
-    console.error("初始化失敗", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("Subscription 頁面初始化失敗", error);
+    }
   }
 }
 initSubscription();

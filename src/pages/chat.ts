@@ -40,10 +40,45 @@ interface Conversation {
   unreadCount: number;
 }
 
+async function getCurrentUser() {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    return null;
+  }
+  let data = await res.json();
+  if (data.success) {
+    return data;
+  } else {
+    return null;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!window.location.pathname.startsWith("/chat")) return;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    location.replace("/");
+  } else {
+    const userData = await getCurrentUser();
+    if (!userData) {
+      location.replace("/");
+    }
+  }
+});
+
 //===================================================//
-// 新增：頁面特定初始化函式，只在 chat 頁面呼叫
 export async function initChatPage() {
-  // 這裡放原本頂層的 DOM 操作
+  let localUserId = localStorage.getItem("userId");
+  if (localUserId) {
+    currentUserId = localUserId;
+    await loadConversations(currentUserId);
+  }
+
+  // 點擊按鈕，發送訊息
   const messageInputForm = document.getElementById(
     "message-input-form"
   ) as HTMLFormElement;
@@ -59,6 +94,7 @@ export async function initChatPage() {
       }
     });
   }
+  // 使用 Input 0.2ms，顯示輸入中
   const sendTyping = debounce(() => {
     const socket = getSocket();
     if (!socket || !currentConversationId) return;
@@ -66,10 +102,9 @@ export async function initChatPage() {
       conversationId: currentConversationId,
       isTyping: true,
     });
-  }, 200); // 延遲 200 毫秒
+  }, 200);
 
   let typingTimeout: NodeJS.Timeout | null = null;
-
   messageInput.addEventListener("input", () => {
     sendTyping();
     if (typingTimeout) {
@@ -85,10 +120,7 @@ export async function initChatPage() {
     }, 1000);
   });
 
-  // 其他 chat 頁面特定初始化，例如 loadConversations 或 render
-  currentUserId = localStorage.getItem("userId")!;
-  await loadConversations(currentUserId);
-
+  // 接收暫存的 convId，載入對話細節
   const convId = localStorage.getItem("activeConvId");
   if (convId) {
     localStorage.removeItem("activeConvId");
@@ -101,6 +133,7 @@ export async function initChatPage() {
     }
   }
 
+  //關閉頁面
   function setupLeaveOnUnload() {
     window.addEventListener("beforeunload", () => {
       const socket = getSocket();
@@ -108,7 +141,9 @@ export async function initChatPage() {
         socket.emit("leave_conversation", {
           conversationId: currentConversationId,
         });
-        console.log(`頁面關閉時離開對話房間: ${currentConversationId}`);
+        if (import.meta.env.VITE_MODE == "development") {
+          console.log(`頁面關閉時離開對話房間: ${currentConversationId}`);
+        }
       }
     });
   }
@@ -132,10 +167,14 @@ async function loadConversations(currentUserId: string) {
       renderConversationList();
       // initializeChatPage();
     } catch (e) {
-      console.error("渲染對話列表失敗", e);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error("渲染對話列表失敗", e);
+      }
     }
   } catch (error) {
-    console.error("載入對話列表失敗:", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("載入對話列表失敗:", error);
+    }
   }
 }
 //conversations 渲染函式
@@ -258,20 +297,13 @@ export function setupChat() {
     "user_typing",
     (event: { payload: { userId: string; isTyping: boolean } }) => {
       const { userId, isTyping } = event.payload;
-      console.log(
-        `收到 user_typing: userId=${userId}, isTyping=${isTyping}, currentUserId=${currentUserId}`
-      );
       const updateTypingIndicator = debounce((isTyping: boolean) => {
         const typingIndicator = document.getElementById(
           "typing-indicator-wrap"
         );
         if (!typingIndicator) {
-          console.error("找不到 typing-indicator-wrap 元素");
           return;
         }
-        console.log(
-          `最終設定 typingIndicator display: ${isTyping ? "flex" : "none"}`
-        );
         typingIndicator.style.display = isTyping ? "flex" : "none";
         const messagesContainer = document.getElementById(
           "messages-container"
@@ -282,21 +314,6 @@ export function setupChat() {
 
       if (userId !== currentUserId) {
         updateTypingIndicator(isTyping);
-        // const typingIndicator = document.getElementById(
-        //   "typing-indicator-wrap"
-        // );
-
-        // if (!typingIndicator) {
-        //   console.error("找不到 typing-indicator-wrap 元素");
-        //   return;
-        // }
-        // if (typingIndicator) {
-        //   if (isTyping) {
-        //     console.log("應該要出現typingIndicator！！");
-        //     typingIndicator.style.display = "flex";
-        //   } else {
-        //     typingIndicator.style.display = "none";
-        //   }
       }
     }
   );
@@ -324,7 +341,6 @@ function renderMessage(message: Message) {
   const messageTemplateClone = messageTemplate.content.cloneNode(
     true
   ) as DocumentFragment;
-  console.log("有開始渲染訊息");
   //共同渲染的東西
   const massageText = messageTemplateClone.querySelector(
     ".message-text"
@@ -369,15 +385,12 @@ function renderMessage(message: Message) {
 //即時更新對話列表的未讀數量和最後訊息
 function updateConversationList(message: Message) {
   // 更新對話列表中的最後訊息
-  console.log("進入函式 updateConversationList。目前的對話", conversations);
   const convIndex = conversations.findIndex(
     (conv) => conv.conversationId === message.conversationId
   );
   if (convIndex !== -1) {
     conversations[convIndex].lastMessage = message;
     conversations[convIndex].lastMessageAt = message.createdAt;
-    console.log("進入函式 updateConversationList。傳遞的訊息", message);
-    console.log("convIndex", convIndex);
 
     // 重新排序和渲染
     conversations.sort(
@@ -432,10 +445,11 @@ async function openConversation(conversationId: string) {
     socket.emit("leave_conversation", {
       conversationId: currentConversationId,
     });
-    console.log(`頁面離開時離開對話房間: ${currentConversationId}`);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log(`離開頁面前，離開對話房間: ${currentConversationId}`);
+    }
   }
 
-  console.log("開啟對話，conversationId:", conversationId);
   currentConversationId = conversationId;
   // 加入對話房間
   socket.emit("join_conversation", { conversationId });
@@ -454,7 +468,9 @@ async function openConversation(conversationId: string) {
     messages = await response.json();
     renderMessages();
   } catch (error) {
-    console.error("載入訊息失敗:", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("載入訊息失敗:", error);
+    }
   }
 }
 //選染對話房間的標題
@@ -561,7 +577,6 @@ function sendMessage(
     content: content.trim(),
     messageType,
   });
-  console.log(`有執行emit send_message，帶${currentConversationId},${content}`);
   const messageInput = document.getElementById(
     "message-input"
   ) as HTMLTextAreaElement;

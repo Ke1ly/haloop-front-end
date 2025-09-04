@@ -12,13 +12,17 @@ type SocketConfig = {
 export const initSocket = async (config: SocketConfig): Promise<void> => {
   // 檢查 token 是否存在
   if (!config.token || !config.userId) {
-    console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
+    }
     return;
   }
 
   const { isConnected } = getConnectionStatus();
   if (isConnected) {
-    console.log("Socket 已連線，跳過初始化");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("Socket 已連線，跳過初始化");
+    }
     return;
   }
 
@@ -27,12 +31,15 @@ export const initSocket = async (config: SocketConfig): Promise<void> => {
     setupNotification();
     if (config.pageName.includes("/chat")) {
       setupChat();
-      console.log("執行 setupChat 和 initChatPage");
       initChatPage();
     }
-    console.log("Socket 初始化成功:", getConnectionStatus());
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("Socket 初始化成功:", getConnectionStatus());
+    }
   } catch (error) {
-    console.error("Socket 初始化失敗:", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("Socket 初始化失敗:", error);
+    }
   }
 };
 

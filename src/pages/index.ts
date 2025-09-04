@@ -15,7 +15,7 @@ async function getRecommWorkPosts(): Promise<WorkPostForCardRender[]> {
   if (!response.ok) throw new Error("Failed to fetch work posts");
   const data = await response.json();
   if (import.meta.env.VITE_MODE == "development") {
-    console.log("推薦貼文資料", data);
+    console.log("當前頁面 recommendation posts", data);
   }
   return data.formattedWorkPosts;
 }
@@ -56,28 +56,36 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
     if (positionName) {
       positionName.textContent = postData.positionName;
     } else {
-      console.warn("Missing .position-name element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .position-name element in template");
+      }
     }
 
     const city = recommendation.querySelector(".unit-city");
     if (city) {
       city.textContent = `位於${postData.unit.city}`;
     } else {
-      console.warn("Missing .unit-city element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .unit-city element in template");
+      }
     }
 
     const unitName = recommendation.querySelector(".unit-name");
     if (unitName) {
       unitName.textContent = postData.unit.unitName;
     } else {
-      console.warn("Missing .unit-name element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .unit-name element in template");
+      }
     }
 
     const avgWorkHours = recommendation.querySelector(".avg-work-hours");
     if (avgWorkHours) {
       avgWorkHours.textContent = `${postData.averageWorkHours}`;
     } else {
-      console.warn("Missing .avg-work-hours element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .avg-work-hours element in template");
+      }
     }
 
     const minDuration = recommendation.querySelector(".min-stay-days");
@@ -98,7 +106,9 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
         minDuration.textContent = "兩個月以上";
       }
     } else {
-      console.warn("Missing .min-stay-days element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .min-stay-days element in template");
+      }
     }
 
     const imagesDiv = recommendation.querySelector(".images-container");
@@ -109,7 +119,9 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
         imagesDiv.appendChild(imgTag);
       });
     } else {
-      console.warn("Missing .work-post-images element in template");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("Missing .work-post-images element in template");
+      }
     }
 
     recommendationSection.appendChild(recommendation);
@@ -140,7 +152,9 @@ async function initRecommendation() {
     const greetingDiv = document.getElementById("greetings") as HTMLDivElement;
     greetingDiv.style.display = "block";
   } else {
-    console.log("目前沒有更新的貼文可推薦");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("目前沒有更新的 recommendation posts");
+    }
   }
 }
 

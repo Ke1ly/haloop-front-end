@@ -19,9 +19,6 @@ initApp();
 
 async function initApp() {
   let token = localStorage.getItem("token");
-  if (import.meta.env.VITE_MODE == "development") {
-    console.log("token:", token);
-  }
   if (!token || token == "undefined") {
     renderMenu(null);
     initAuthUI();
@@ -30,9 +27,6 @@ async function initApp() {
     if (userData) {
       renderMenu(userData.user.userType);
       logOutUI();
-      // if (userData.user.userType == "HELPER") {
-      //   sse(userData.user.id);
-      // }
     } else {
       renderMenu(null);
       initAuthUI();
@@ -119,16 +113,16 @@ notificationBtn.addEventListener("click", async () => {
 
 function initAuthUI() {
   // 角色按鈕樣式
-  const signUpRoleButtons = document.querySelectorAll(".sign-up-role");
-  const signInRoleButtons = document.querySelectorAll(".sign-in-role");
-  [signUpRoleButtons, signInRoleButtons].forEach((btns) => {
-    btns.forEach((button) => {
-      button.addEventListener("click", () => {
-        btns.forEach((btn) => btn.classList.remove("selected"));
-        button.classList.add("selected");
-      });
-    });
-  });
+  // const signUpRoleButtons = document.querySelectorAll(".sign-up-role");
+  // const signInRoleButtons = document.querySelectorAll(".sign-in-role");
+  // [signUpRoleButtons, signInRoleButtons].forEach((btns) => {
+  //   btns.forEach((button) => {
+  //     button.addEventListener("click", () => {
+  //       btns.forEach((btn) => btn.classList.remove("selected"));
+  //       button.classList.add("selected");
+  //     });
+  //   });
+  // });
 
   // 點擊註冊按鈕，跳出表單
   // const toSignUpDiv = document.getElementById("sign-up-div") as HTMLDivElement;
@@ -185,10 +179,6 @@ function initAuthUI() {
     const password = document.getElementById(
       "sign-in-password"
     ) as HTMLInputElement;
-    // const userType = getSelectedBtnValue(".sign-in-role");
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("取得登入資料", { email, password });
-    }
 
     // 驗證登入資料
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -223,7 +213,6 @@ function initAuthUI() {
         throw new Error(errorData.message || "登入時發生錯誤");
       }
       const signInData = await response.json();
-      console.log(signInData);
 
       if (signInData.success) {
         localStorage.setItem("token", signInData.token);

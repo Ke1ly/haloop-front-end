@@ -183,11 +183,11 @@ function validatePage2() {
     realname.length > 15 ||
     /[\d!@#$%^&*(),.?":{}|<>]/.test(realname)
   ) {
-    console.log("realname", realname);
     errors.push("真實姓名長度必須在 2-15 字之間，不應包含數字或特殊符號");
   }
-
-  console.log("errors內容物", errors);
+  if (import.meta.env.VITE_MODE == "development") {
+    console.log("errors內容", errors);
+  }
   return { isValid: errors.length === 0, errors };
 }
 
@@ -201,7 +201,9 @@ async function submitRegistration(identity: string) {
   }
 
   const formData = getFormValues(identity);
-  console.log("即將送去註冊的data", formData);
+  if (import.meta.env.VITE_MODE == "development") {
+    console.log("即將送去註冊的data", formData);
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -225,16 +227,19 @@ async function submitRegistration(identity: string) {
       } else {
         errorMessages = ["註冊失敗，請檢查輸入或稍後再試"];
       }
-
-      console.error("註冊回應錯誤", {
-        status: response.status,
-        data: data,
-      });
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error("註冊回應錯誤", {
+          status: response.status,
+          data: data,
+        });
+      }
 
       showErrors("page-3-response-message", errorMessages);
     }
   } catch (error) {
-    console.log(error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log(error);
+    }
     showErrors("page-3-response-message", ["伺服器錯誤，請稍後再試"]);
   }
 }

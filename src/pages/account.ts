@@ -1,7 +1,6 @@
 import type { WorkPost } from "../types/Work.js";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
 import { API_BASE_URL } from "../utils/config.js";
-console.log("Current Mode:", import.meta.env.VITE_API_URL);
 
 //用 token 取得當前使用者資訊
 async function getCurrentUser() {
@@ -10,23 +9,13 @@ async function getCurrentUser() {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
-
   if (!res.ok) {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.error("Response not OK:", res.status);
-    }
     return null;
   }
   let data = await res.json();
   if (data.success) {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return data;
   } else {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return null;
   }
 }
@@ -58,13 +47,10 @@ async function initProfileByRole() {
     });
   });
   if (userData) {
-    console.log("有讀到userData");
     if (userData.user.userType == "HELPER") {
-      console.log("有讀到HELPER");
       helperBasicSection.style.display = "flex";
       initBasicHelperProfile();
     } else if (userData.user.userType == "HOST") {
-      console.log("有讀到HOST");
       initBasicHostProfile();
       initHostProfile();
       hostProfileBtn.style.display = "block";
@@ -306,7 +292,7 @@ function initHostProfile() {
         uploadData.append("images", imageFile);
       });
       if (import.meta.env.VITE_MODE == "development") {
-        console.log("前端準備上傳的img檔案", uploadData.getAll("images"));
+        console.log("前端準備上傳的 img 檔案", uploadData.getAll("images"));
       }
 
       const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
@@ -427,9 +413,12 @@ async function initBasicHelperProfile() {
     });
 
     if (Object.keys(changedData).length === 0) {
-      console.log("沒有欄位變更");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("沒有欄位變更，不發送變更請求");
+      }
       return;
     }
+
     // 對應後端資料欄位命名
     const payload: Record<string, string> = {};
     for (const [key, value] of Object.entries(changedData)) {
@@ -484,12 +473,12 @@ async function initBasicHelperProfile() {
         } else {
           errorMessages = ["帳號資料更改失敗，請檢查輸入或稍後再試"];
         }
-
-        console.error("帳號資料更改回應錯誤", {
-          status: response.status,
-          data: data,
-        });
-
+        if (import.meta.env.VITE_MODE == "development") {
+          console.error("帳號資料更改回應錯誤", {
+            status: response.status,
+            data: data,
+          });
+        }
         showErrors("helper-basic-response-message", errorMessages);
       }
 
@@ -497,7 +486,9 @@ async function initBasicHelperProfile() {
         console.log("前端獲得 profileResponseData", data);
       }
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error(err);
+      }
       showErrors("helper-basic-response-message", ["伺服器錯誤，請稍後再試"]);
     }
   });
@@ -516,7 +507,10 @@ async function initBasicHostProfile() {
   });
   if (!response.ok) throw new Error("Failed to fetch host profile");
   const data = await response.json();
-  console.log("應該要渲染的店家資料", data);
+  if (import.meta.env.VITE_MODE == "development") {
+    console.log("此頁面渲染的店家資料", data);
+  }
+
   if (data.hostProfile) {
     const fields = [
       { key: "unit-name", value: data.hostProfile.unitName },
@@ -601,7 +595,9 @@ async function initBasicHostProfile() {
     });
 
     if (Object.keys(changedData).length === 0) {
-      console.log("沒有欄位變更");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("沒有欄位變更，不發送變更請求");
+      }
       return;
     }
 
@@ -675,12 +671,12 @@ async function initBasicHostProfile() {
         } else {
           errorMessages = ["帳號資料更改失敗，請檢查輸入或稍後再試"];
         }
-
-        console.error("帳號資料更改回應錯誤", {
-          status: response.status,
-          data: data,
-        });
-
+        if (import.meta.env.VITE_MODE == "development") {
+          console.error("帳號資料更改回應錯誤", {
+            status: response.status,
+            data: data,
+          });
+        }
         showErrors("host-basic-response-message", errorMessages);
       }
 
@@ -688,7 +684,9 @@ async function initBasicHostProfile() {
         console.log("前端獲得 profileResponseData", data);
       }
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error(err);
+      }
       showErrors("host-basic-response-message", ["伺服器錯誤，請稍後再試"]);
     }
   });
@@ -719,12 +717,12 @@ function validateHelperProfile() {
     realname.length > 15 ||
     /[\d!@#$%^&*(),.?":{}|<>]/.test(realname)
   ) {
-    console.log("realname", realname);
     errors.push("真實姓名長度必須在 2-15 字之間，不應包含數字或特殊符號");
   }
   if (!bio || bio.length < 20) errors.push("自我介紹為必填，且至少 20 字");
-
-  console.log("errors 內容物", errors);
+  if (import.meta.env.VITE_MODE == "development") {
+    console.log("errors 內容", errors);
+  }
   return { isValid: errors.length === 0, errors };
 }
 
@@ -740,8 +738,6 @@ function validateHostProfile() {
   const address = getInputValue("unit-address");
   let city = getSelectedCity();
   const unitDescription = getInputValue("unit-description");
-
-  console.log("city", city);
 
   if (!unitName) errors.push("單位名稱為必填");
   if (!address) errors.push("地址為必填");
@@ -774,11 +770,11 @@ function validateHostProfile() {
     realname.length > 15 ||
     /[\d!@#$%^&*(),.?":{}|<>]/.test(realname)
   ) {
-    console.log("realname", realname);
     errors.push("真實姓名長度必須在 2-15 字之間，不應包含數字或特殊符號");
   }
-
-  console.log("errors 內容物", errors);
+  if (import.meta.env.VITE_MODE == "development") {
+    console.log("errors 內容", errors);
+  }
   return { isValid: errors.length === 0, errors };
 }
 
@@ -799,9 +795,7 @@ function getSelectedCity(): string | undefined {
   ) as HTMLDataListElement;
 
   const inputValue = cityInput.value;
-  console.log("inputValue", inputValue);
   const options = cityDataList.options;
-  console.log("options", options);
   for (let i = 0; i < options.length; i++) {
     if (options[i].value === inputValue) {
       return inputValue;

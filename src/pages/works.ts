@@ -20,7 +20,7 @@ async function getWorkPosts(
   } else {
     const queryString = toQueryString(filter);
     if (import.meta.env.VITE_MODE == "development") {
-      console.log(queryString);
+      console.log("送出查詢的 query string", queryString);
     }
     const response = await fetch(`${API_BASE_URL}/api/works?${queryString}`);
     if (!response.ok) throw new Error("Failed to fetch work posts");
@@ -71,7 +71,9 @@ async function renderWorkPosts(
       if (positionName) {
         positionName.textContent = postData.positionName;
       } else {
-        console.warn("Missing .position-name element in template");
+        if (import.meta.env.VITE_MODE == "development") {
+          console.warn("Missing .position-name element in template");
+        }
       }
       const unitName = workPostTemplateClone.querySelector(
         ".unit-name"
@@ -79,7 +81,9 @@ async function renderWorkPosts(
       if (unitName) {
         unitName.textContent = postData.unit.unitName!;
       } else {
-        console.warn("Missing .unit-name element in template");
+        if (import.meta.env.VITE_MODE == "development") {
+          console.warn("Missing .unit-name element in template");
+        }
       }
 
       const avgWorkHours = workPostTemplateClone.querySelector(
@@ -88,7 +92,9 @@ async function renderWorkPosts(
       if (avgWorkHours) {
         avgWorkHours.textContent = `平均每日工時 ${postData.averageWorkHours} 小時`;
       } else {
-        console.warn("Missing .avg-work-hours element in template");
+        if (import.meta.env.VITE_MODE == "development") {
+          console.warn("Missing .avg-work-hours element in template");
+        }
       }
 
       const minDuration = workPostTemplateClone.querySelector(
@@ -111,7 +117,9 @@ async function renderWorkPosts(
           minDuration.textContent = "最短停留兩個月以上";
         }
       } else {
-        console.warn("Missing .min-stay-days element in template");
+        if (import.meta.env.VITE_MODE == "development") {
+          console.warn("Missing .min-stay-days element in template");
+        }
       }
       const filterTags = workPostTemplateClone.querySelector(
         ".filter-tags"
@@ -166,83 +174,6 @@ async function renderWorkPosts(
           });
         }
       }
-
-      // const accommodations = workPostTemplateClone.querySelector(
-      //   ".accommodations"
-      // ) as HTMLElement;
-      // if (accommodations && filter && filter.accommodations) {
-      //   if (filter.accommodations.length > 0) {
-      //     postData.accommodations.forEach((accommodationsOption) => {
-      //       if (filter.accommodations?.includes(accommodationsOption)) {
-      //         let divTag = document.createElement("div");
-      //         divTag.textContent = accommodationsOption;
-      //         accommodations.appendChild(divTag);
-      //       }
-      //     });
-      //   } else {
-      //     accommodations.style.display = "none";
-      //   }
-      // } else {
-      //   console.warn("Missing .accommodations element in template");
-      // }
-
-      // const experiences = workPostTemplateClone.querySelector(
-      //   ".experiences"
-      // ) as HTMLElement;
-      // if (experiences && filter && filter.experiences) {
-      //   if (filter.experiences.length > 0) {
-      //     postData.experiences.forEach((experiencesOption) => {
-      //       if (filter.experiences?.includes(experiencesOption)) {
-      //         let divTag = document.createElement("div");
-      //         divTag.textContent = experiencesOption;
-      //         experiences.appendChild(divTag);
-      //       }
-      //     });
-      //   } else {
-      //     experiences.style.display = "none";
-      //   }
-      // } else {
-      //   console.warn("Missing .experiences element in template");
-      // }
-
-      // const environments = workPostTemplateClone.querySelector(
-      //   ".environments"
-      // ) as HTMLElement;
-      // if (environments && filter && filter.environments) {
-      //   if (filter.environments.length > 0) {
-      //     postData.environments.forEach((environmentsOption) => {
-      //       if (filter.environments?.includes(environmentsOption)) {
-      //         let divTag = document.createElement("div");
-      //         divTag.textContent = environmentsOption;
-      //         environments.appendChild(divTag);
-      //       }
-      //     });
-      //   } else {
-      //     environments.style.display = "none";
-      //   }
-      // } else {
-      //   console.warn("Missing .environments element in template");
-      // }
-
-      // const meals = workPostTemplateClone.querySelector(
-      //   ".meals"
-      // ) as HTMLElement;
-      // if (meals && filter && filter.meals) {
-      //   if (filter.meals.length > 0) {
-      //     postData.meals.forEach((mealsOption) => {
-      //       if (filter.meals?.includes(mealsOption)) {
-      //         let divTag = document.createElement("div");
-      //         divTag.textContent = mealsOption;
-      //         meals.appendChild(divTag);
-      //       }
-      //     });
-      //   } else {
-      //     meals.style.display = "none";
-      //   }
-      // } else {
-      //   console.warn("Missing .meals element in template");
-      // }
-
       const imagesDiv = workPostTemplateClone.querySelector(
         ".work-post-images"
       ) as HTMLElement;
@@ -253,7 +184,9 @@ async function renderWorkPosts(
           imagesDiv.appendChild(imgTag);
         });
       } else {
-        console.warn("Missing .work-post-images element in template");
+        if (import.meta.env.VITE_MODE == "development") {
+          console.warn("Missing .work-post-images element in template");
+        }
       }
       const images = imagesDiv.querySelectorAll("img");
       if (images && images.length > 0) {
@@ -300,11 +233,15 @@ async function renderWorkPosts(
 async function initWorkPosts(filter?: WorkPostFilterInput) {
   try {
     const postsData: WorkPostForCardRender[] = await getWorkPosts(filter);
-    console.log(postsData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("當前頁面渲染的 posts", postsData);
+    }
     await renderWorkPosts(postsData, filter);
     updateMarkers(postsData);
   } catch (error) {
-    console.error("初始化失敗", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("works 頁面初始化失敗", error);
+    }
   }
 }
 
@@ -397,14 +334,8 @@ async function getCurrentUser() {
   });
   let data = await res.json();
   if (data.success) {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return data;
   } else {
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("userData", data);
-    }
     return null;
   }
 }
@@ -447,29 +378,69 @@ let currentFilter: WorkPostFilterInput | null = null;
     const responseMessage = document.querySelector(
       ".subscription-response-message"
     ) as HTMLDivElement;
+    const errorMessage = document.querySelector(
+      ".subscription-error-message"
+    ) as HTMLDivElement;
     if (responseMessage) {
       responseMessage.textContent = "";
+    }
+    if (errorMessage) {
+      errorMessage.textContent = "";
     }
     //關閉原本的 advanced-search dialog
 
     //取得訂閱輸入資料，渲染於 dialog
     const startDateStr = picker.getStartDate()?.format("YYYY-MM-DD");
     const endDateStr = picker.getEndDate()?.format("YYYY-MM-DD");
+    const city = getSelectedCity();
+    const applicantCount = getSelectNumberValue("applicant-count");
+    const positionCategories = getSelectedOptionValues(
+      ".position-category-option-btn"
+    );
+    const averageWorkHours = getSelectNumberValue("average-work-hours");
+    const minDuration = getSelectNumberValue("min-stay-days");
+    const meals = getSelectedOptionValues(".meal-option-btn");
+    const experiences = getSelectedOptionValues(".experience-option-btn");
+    const accommodations = getSelectedOptionValues(".accommodation-option-btn");
+    const environments = getSelectedOptionValues(".environment-option-btn");
+    if (
+      !(
+        city ||
+        startDateStr ||
+        endDateStr ||
+        applicantCount ||
+        averageWorkHours ||
+        minDuration ||
+        positionCategories.length ||
+        meals.length ||
+        experiences.length ||
+        accommodations.length ||
+        environments.length
+      )
+    ) {
+      errorMessage.textContent = "請先選擇至少一個條件";
+      errorMessage.style.color = "red";
+      errorMessage.style.margin = "10px 5px";
+      errorMessage.style.fontSize = "14px";
+      return;
+    }
+
     currentFilter = {
-      city: getSelectedCity(),
+      city: city,
       startDate: startDateStr,
       endDate: endDateStr,
-      applicantCount: getSelectNumberValue("applicant-count"),
-      positionCategories: getSelectedOptionValues(
-        ".position-category-option-btn"
-      ),
-      averageWorkHours: getSelectNumberValue("average-work-hours"),
-      minDuration: getSelectNumberValue("min-stay-days"),
-      accommodations: getSelectedOptionValues(".accommodation-option-btn"),
-      meals: getSelectedOptionValues(".meal-option-btn"),
-      experiences: getSelectedOptionValues(".experience-option-btn"),
-      environments: getSelectedOptionValues(".environment-option-btn"),
+      applicantCount,
+      positionCategories,
+      averageWorkHours,
+      minDuration,
+      accommodations,
+      meals,
+      experiences,
+      environments,
     };
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("準備發送訂閱的 filter", currentFilter);
+    }
 
     //打開訂閱 dialog
     const subscriptionDialog = document.getElementById(
@@ -499,17 +470,7 @@ if (confirmBtn) {
     const responseMessage = document.querySelector(
       ".subscription-response-message"
     ) as HTMLDivElement;
-    if (!currentFilter) {
-      console.log("沒有currentFilter", currentFilter);
-      const responseMessage = document.querySelector(
-        ".subscription-response-message"
-      ) as HTMLDivElement;
-      if (responseMessage) {
-        responseMessage.textContent = "請先選擇篩選條件";
-        responseMessage.style.color = "red";
-      }
-      return;
-    }
+
     if (!filterName) {
       if (responseMessage) {
         responseMessage.textContent = "請輸入訂閱名稱";
@@ -517,8 +478,9 @@ if (confirmBtn) {
       }
       return;
     }
-
-    currentFilter.name = filterName;
+    if (currentFilter) {
+      currentFilter.name = filterName;
+    }
 
     try {
       //將資料存入後端
@@ -534,7 +496,7 @@ if (confirmBtn) {
       const filterSubscribeResponseData = await res.json();
 
       if (import.meta.env.VITE_MODE == "development") {
-        console.log("filterSubscribeResponseData", filterSubscribeResponseData);
+        console.log("filter 訂閱 response", filterSubscribeResponseData);
       }
 
       if (responseMessage) {
@@ -557,7 +519,10 @@ if (confirmBtn) {
         filterDialog.classList.remove("show");
       }, 2000);
     } catch (error) {
-      console.error("訂閱失敗:", error);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error("訂閱失敗:", error);
+      }
+
       const responseMessage = document.querySelector(
         ".subscription-response-message"
       );
@@ -689,7 +654,6 @@ function updateMarkers(postsData: WorkPostForCardRender[]) {
 
   // 刪除不需要的 marker
   for (const [id, marker] of markerMap) {
-    console.log("markerMap", markerMap);
     if (!newIds.has(id)) {
       marker.map = null;
       markerMap.delete(id);
@@ -766,7 +730,9 @@ function zoomToCity(map: google.maps.Map, city: string) {
         map.setZoom(10);
       }
     } else {
-      console.error("Geocode error:", status);
+      if (import.meta.env.VITE_MODE == "development") {
+        console.error("Geocode error:", status);
+      }
     }
   });
 }
@@ -830,7 +796,6 @@ function initSearchSummary() {
       "search-area"
     ) as HTMLInputElement;
     if (cityInput.value) {
-      console.log("cityInput.textContent", cityInput.textContent);
       searchSummaryCity.textContent = cityInput.value;
     } else {
       searchSummaryCity.textContent = "附近的去處";
@@ -841,7 +806,6 @@ function initSearchSummary() {
   if (searchSummaryDate) {
     const dateInput = document.getElementById("date-range") as HTMLInputElement;
     if (dateInput.value) {
-      console.log("dateInput.textContent", dateInput.textContent);
       searchSummaryDate.textContent = dateInput.value;
     } else {
       searchSummaryDate.textContent = "任何時間";

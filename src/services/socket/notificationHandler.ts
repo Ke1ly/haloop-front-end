@@ -24,14 +24,18 @@ interface NotificationUnitData {
 // 顯示瀏覽器通知
 const showBrowserNotification = (notification: NotificationData): void => {
   if (!("Notification" in window)) {
-    console.warn("此瀏覽器不支援桌面通知");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.warn("此瀏覽器不支援桌面通知");
+    }
     return;
   }
   if (Notification.permission === "default") {
     Notification.requestPermission()
       .then((permission) => {
         if (permission !== "granted") {
-          console.log("用戶拒絕通知權限");
+          if (import.meta.env.VITE_MODE == "development") {
+            console.log("用戶拒絕通知權限");
+          }
           return;
         }
         // 權限允許後顯示通知
@@ -42,10 +46,14 @@ const showBrowserNotification = (notification: NotificationData): void => {
         });
       })
       .catch((error) => {
-        console.error("請求通知權限失敗:", error);
+        if (import.meta.env.VITE_MODE == "development") {
+          console.error("請求通知權限失敗:", error);
+        }
       });
   } else if (Notification.permission === "denied") {
-    console.log("通知權限已被拒絕，無法顯示通知");
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("通知權限已被拒絕，無法顯示通知");
+    }
     return;
   } else if (Notification.permission === "granted") {
     new Notification(notification.title, {
@@ -61,9 +69,7 @@ const updateUnreadCount = (count: number): void => {
   const countContainer = document.getElementById("notification-count")!;
   const countNumber = document.getElementById("notification-count-number")!;
   if (count > 0) {
-    console.log("count", count);
     countNumber.textContent = `${count}`;
-    // countNumber.textContent = count.toString();
     countContainer.style.display = "flex";
   } else {
     countContainer.style.display = "none";
@@ -74,7 +80,6 @@ const updateUnreadCount = (count: number): void => {
 const showNotificationList = (notifications: NotificationData[]): void => {
   const notificationContainer = document.getElementById("notification-list");
   if (!notificationContainer) return;
-  console.log("showNotificationList拿到的notifications", notifications);
   if (notifications.length > 0) {
     notifications.forEach((notification) => {
       const listItem = document.createElement("a");

@@ -48,11 +48,15 @@ const triggerEvent = (event: SocketEvent): void => {
       try {
         handler(event);
       } catch (error) {
-        console.error(`執行 ${event.type} handler 時錯誤:`, error);
+        if (import.meta.env.VITE_MODE == "development") {
+          console.error(`執行 ${event.type} handler 時發生錯誤:`, error);
+        }
       }
     });
   } else {
-    console.warn(`未找到 ${event.type} 的 handler`);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.warn(`未找到 ${event.type} 的 handler`);
+    }
   }
 };
 
@@ -62,7 +66,9 @@ export const connectToSocket = (config: SocketConfig): Promise<void> => {
     socketState.config = config;
 
     if (!config.token || !config.userId) {
-      console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
+      if (import.meta.env.VITE_MODE == "development") {
+        console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
+      }
       return;
     }
 
@@ -136,7 +142,9 @@ export const unregisterSocketHandler = (
 ): void => {
   if (!handler) {
     socketState.eventHandlers.delete(event);
-    console.log(`事件 ${event} 的所有處理函數已移除`);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log(`事件 ${event} 的所有處理函數已移除`);
+    }
   } else {
     const handlers =
       socketState.eventHandlers.get(event)?.filter((h) => h !== handler) || [];
@@ -145,7 +153,9 @@ export const unregisterSocketHandler = (
     } else {
       socketState.eventHandlers.delete(event);
     }
-    console.log(`事件 ${event} 的指定處理函數已移除`);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log(`事件 ${event} 的指定處理函數已移除`);
+    }
   }
 };
 
@@ -158,7 +168,9 @@ export const emitSocketEvent = <T>(
   if (socketState.socket?.connected) {
     socketState.socket.emit(event, data, callback);
   } else {
-    console.warn(`Socket 未連線，無法發送事件: ${event}`);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.warn(`Socket 未連線，無法發送事件: ${event}`);
+    }
   }
 };
 

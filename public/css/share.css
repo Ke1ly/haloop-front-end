@@ -169,8 +169,7 @@ body > header > div > div.right {
   }
 }
 
-body > dialog#sign-up-dialog,
-dialog#sign-in-dialog {
+body > dialog#sign-in-dialog {
   width: 300px;
   border-radius: 15px;
   border: none;
@@ -209,11 +208,9 @@ dialog#sign-in-dialog {
     label {
       margin-top: 10px;
     }
-    div#sign-up-role-div,
     div#sign-in-role-div {
       display: flex;
       flex-direction: row;
-      button.sign-up-role,
       button.sign-in-role {
         margin: 5px 3px;
         padding: 8px 15px;
@@ -222,13 +219,13 @@ dialog#sign-in-dialog {
         background-color: white;
         cursor: pointer;
       }
-      button.sign-up-role.selected,
+
       button.sign-in-role.selected {
         background-color: #eaeaea;
         border: 1px solid #000000;
       }
     }
-    button.sign-up-submit-btn,
+
     button.sign-in-submit-btn {
       width: 200px;
       border: none;
@@ -239,10 +236,19 @@ dialog#sign-in-dialog {
       cursor: pointer;
       margin: 10px 0px;
     }
+    div#to-sign-up-btn {
+      a {
+        text-decoration: none;
+        color: rgb(162, 139, 121);
+        font-weight: 500;
+        &:hover {
+          background-color: #ede8de;
+        }
+      }
+    }
   }
 }
 
-dialog#sign-up-dialog.show,
 dialog#sign-in-dialog.show {
   top: 80px;
 }

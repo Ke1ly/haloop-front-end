@@ -3,6 +3,7 @@ import type { WorkPostForPageRender } from "../types/Work";
 import { API_BASE_URL } from "../utils/config.js";
 // import Litepicker from "litepicker";
 // import "litepicker/dist/css/litepicker.css";
+import { createDialogClickHandler } from "../utils/dialog-utils.js";
 
 function loadGoogleMaps(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -41,7 +42,7 @@ async function getWorkPost(): Promise<WorkPostForPageRender> {
   const data = await response.json();
   return data;
 }
-function renderWorkPost(postData: WorkPostForPageRender) {
+async function renderWorkPost(postData: WorkPostForPageRender) {
   if (postData.unit.latitude !== null && postData.unit.longitude !== null) {
     const position = {
       lat: postData.unit.latitude,
@@ -66,12 +67,15 @@ function renderWorkPost(postData: WorkPostForPageRender) {
   } else {
     const map = document.getElementById("google-map");
     if (map) {
-      map.style.border = "1px solid black";
-      map.style.fontSize = "14px";
-      map.style.color = "rgb(200, 70, 40)";
+      // map.style.border = "1px solid rgb(162, 139, 121)";
+      map.style.background = " #ede8de";
+      map.style.boxShadow = "0px 0px 5px rgba(0, 0 , 0 , 0.2)";
+      map.style.fontWeight = "500";
+      map.style.color = "rgb(162, 139, 121)";
       map.style.textAlign = "center";
       map.style.padding = "20px 0px";
-      map.textContent = "店家提供的地址可能有誤，或不完整，無法解析地圖位置";
+      map.textContent =
+        "Oops! 店家提供的地址可能有誤，或不完整，暫時無法解析地圖位置";
     }
 
     console.warn(
@@ -166,7 +170,6 @@ function renderWorkPost(postData: WorkPostForPageRender) {
   const availableDates = document.querySelector(
     ".available-dates"
   ) as HTMLDivElement;
-  console.log(typeof postData.startDate);
   let start = new Date(postData.startDate).toISOString().split("T")[0];
   let end = new Date(postData.endDate).toISOString().split("T")[0];
   availableDates.textContent = `開放於 ${start} 至  ${end}`;
@@ -194,12 +197,68 @@ function renderWorkPost(postData: WorkPostForPageRender) {
   profileUnitName.textContent = postData.unit.unitName;
 
   const joinedAt = document.querySelector(".joined-at") as HTMLDivElement;
-  joinedAt.textContent = `${postData.unit.createdAt}`;
+  const joinDate = new Date(postData.unit.createdAt)
+    .toISOString()
+    .split("T")[0];
+  joinedAt.textContent = `於 ${joinDate} 加入`;
+
+  const lastLoginAt = document.querySelector(
+    ".last-login-at"
+  ) as HTMLDivElement;
+
+  if (postData.unit.user.lastLoginAt) {
+    const loginDate = new Date(
+      postData.unit.user.lastLoginAt
+    ).toLocaleDateString("zh-TW", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    lastLoginAt.textContent = `上次登入於 ${loginDate}`;
+  } else {
+    lastLoginAt.textContent = ``;
+  }
 
   const sendMessageBtn = document.querySelector(
     ".send-message-btn"
   ) as HTMLDivElement;
+  const userData = await getCurrentUser();
+  if (userData && userData.user.userType === "HOST") {
+    sendMessageBtn.style.display = "none";
+  }
+
   sendMessageBtn.addEventListener("click", async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      const signInDialog = document.getElementById(
+        "sign-in-dialog"
+      ) as HTMLDialogElement;
+      signInDialog.showModal();
+      signInDialog.classList.add("show");
+      signInDialog.addEventListener(
+        "click",
+        createDialogClickHandler(signInDialog)
+      );
+      return;
+    } else {
+      const userData = await getCurrentUser();
+      if (!userData) {
+        const signInDialog = document.getElementById(
+          "sign-in-dialog"
+        ) as HTMLDialogElement;
+        signInDialog.showModal();
+        signInDialog.classList.add("show");
+        signInDialog.addEventListener(
+          "click",
+          createDialogClickHandler(signInDialog)
+        );
+        return;
+      }
+    }
+
     let response = await fetch(`${API_BASE_URL}/api/chat/conversation`, {
       method: "POST",
       headers: {
@@ -213,23 +272,36 @@ function renderWorkPost(postData: WorkPostForPageRender) {
     let coversationData = await response.json();
     localStorage.setItem("activeConvId", coversationData.id);
     window.location.assign("/chat.html");
-    // if (coversationData.id) {
-    //   window.location.assign(`/chat.html?conv=${coversationData.id}`);
-    // } else {
-    //   console.error("新增對話失敗");
-    // }
-    // console.log("新增聊天的", coversationData);
-    // window.location.assign("/chat.html");
   });
+}
+async function getCurrentUser() {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    return null;
+  }
+  let data = await res.json();
+  if (data.success) {
+    return data;
+  } else {
+    return null;
+  }
 }
 
 async function initWorkPosts() {
   try {
     const postData: WorkPostForPageRender = await getWorkPost();
-    console.log(postData);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.log("當前頁面渲染 workpost 資料", postData);
+    }
     renderWorkPost(postData);
   } catch (error) {
-    console.error("初始化失敗", error);
+    if (import.meta.env.VITE_MODE == "development") {
+      console.error("頁面初始化失敗", error);
+    }
   }
 }
 

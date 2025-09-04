@@ -140,14 +140,13 @@
           <div class="host-profile">
             <div class="host-profile-left">
               <div class="unit-avatar">
-                <img src="" alt="" />
+                <img src="/img/user-default.png" alt="" />
               </div>
-              <div class="profile-unit-name"></div>
             </div>
             <div class="host-profile-right">
-              <div>最近於 <span class="last-login"></span> 登入</div>
-              <div>回覆率 <span class="response-rate"></span> %</div>
-              <div>於 <span class="joined-at"></span> 加入換煥</div>
+              <div class="profile-unit-name"></div>
+              <div><span class="last-login-at"></span></div>
+              <div><span class="joined-at"></span></div>
             </div>
           </div>
           <div class="line"></div>
@@ -172,24 +171,13 @@
           placeholder="請輸入電子郵件地址"
         />
         <input type="password" id="sign-in-password" placeholder="請輸入密碼" />
-        <label>選擇登入身份</label>
-        <div id="sign-in-role-div">
-          <button
-            class="sign-in-role selected"
-            data-value="HELPER"
-            type="button"
-          >
-            幫手
-          </button>
-          <button class="sign-in-role" data-value="HOST" type="button">
-            店家
-          </button>
-        </div>
         <button class="sign-in-submit-btn">登入</button>
         <!-- <p>或</p>
           <a href="">使用 Google 繼續</a> -->
         <p id="sign-in-response-message"></p>
-        <div>還沒有帳號？<a href="/signup.html">前往註冊</a></div>
+        <div id="to-sign-up-btn">
+          還沒有帳號？<a href="/signup.html">前往註冊</a>
+        </div>
       </form>
     </dialog>
   </body>
