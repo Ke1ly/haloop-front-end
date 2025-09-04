@@ -203,148 +203,181 @@ function initHostProfile() {
   ) as HTMLButtonElement;
   postWorkBtn.addEventListener("click", async (e) => {
     e.preventDefault();
+    if (postWorkBtn.disabled) return;
+    postWorkBtn.textContent = "上傳中";
+    postWorkBtn.disabled = true;
+    postWorkBtn.classList.add("loading");
 
-    //先檢查是否有填完基本資料
-    const response = await fetch(`${API_BASE_URL}/api/profile/host`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    if (!response.ok) throw new Error("Failed to fetch work posts");
-    const data = await response.json();
-    if (
-      !(
-        data.hostProfile.unitName &&
-        data.hostProfile.address &&
-        data.hostProfile.city &&
-        data.hostProfile.unitDescription &&
-        data.user.username &&
-        data.user.realname &&
-        data.user.email
-      )
-    ) {
-      const errorDialog = document.getElementById(
-        "error-dialog"
-      ) as HTMLDialogElement;
-      const errorMessage = document.querySelector(
-        ".error-message"
-      ) as HTMLDivElement;
-      errorMessage.textContent =
-        "請先至「編輯基本資料」填寫完整資料，包含：單位名稱、聯絡電話、地址等";
-      errorDialog.showModal();
-      errorDialog.classList.add("show");
-      errorDialog.addEventListener(
-        "click",
-        createDialogClickHandler(errorDialog)
-      );
-      return;
-    }
+    try {
+      showProgressBar();
+      updateProgress(20, "驗證資料中...");
 
-    const imageInput = document.getElementById(
-      "host-img-input"
-    ) as HTMLInputElement;
-    const imageFiles = imageInput.files;
-    let startDate = getInputValue("work-start-date");
-    let endDate = getInputValue("work-end-date");
-    let recruitCount = getSelectNumberValue("recruit-count");
-    let positionName = getInputValue("position-name");
-    let positionCategories = getSelectedOptionValues(
-      ".position-category-option-btn"
-    );
-    let averageWorkHours = getSelectNumberValue("average-work-hours");
-    let minDuration = getSelectNumberValue("min-stay-days");
-    let accommodations = getSelectedOptionValues(".accommodation-option-btn");
-    if (
-      !(
-        startDate &&
-        endDate &&
-        recruitCount &&
-        positionName &&
-        positionCategories &&
-        averageWorkHours &&
-        minDuration &&
-        accommodations
-      )
-    ) {
-      const errorDialog = document.getElementById(
-        "error-dialog"
-      ) as HTMLDialogElement;
-      const errorMessage = document.querySelector(
-        ".error-message"
-      ) as HTMLDivElement;
-      errorMessage.textContent = "請輸入所有必填資訊";
-      errorDialog.showModal();
-      errorDialog.classList.add("show");
-      errorDialog.addEventListener(
-        "click",
-        createDialogClickHandler(errorDialog)
-      );
-      return;
-    }
-
-    // 將圖片上傳至 S3
-    const imageUrls: string[] = [];
-    if (imageFiles && imageFiles.length > 0) {
-      const uploadData = new FormData();
-      Array.from(imageFiles).forEach((imageFile) => {
-        uploadData.append("images", imageFile);
-      });
-      if (import.meta.env.VITE_MODE == "development") {
-        console.log("前端準備上傳的 img 檔案", uploadData.getAll("images"));
-      }
-
-      const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
-        method: "POST",
-        body: uploadData,
-      });
-      const { urls } = await uploadResponse.json();
-      imageUrls.push(...urls);
-      if (import.meta.env.VITE_MODE == "development") {
-        console.log("前端收到 imageUrls string list", imageUrls);
-      }
-    }
-
-    // 整理 WorkPost 資料
-    let postData: WorkPost = {
-      startDate: getInputValue("work-start-date"),
-      endDate: getInputValue("work-end-date"),
-      recruitCount: getSelectNumberValue("recruit-count"),
-      images: imageUrls,
-      positionName: getInputValue("position-name"),
-      positionCategories: getSelectedOptionValues(
+      const imageInput = document.getElementById(
+        "host-img-input"
+      ) as HTMLInputElement;
+      const imageFiles = imageInput.files;
+      let startDate = getInputValue("work-start-date");
+      let endDate = getInputValue("work-end-date");
+      let recruitCount = getSelectNumberValue("recruit-count");
+      let positionName = getInputValue("position-name");
+      let positionCategories = getSelectedOptionValues(
         ".position-category-option-btn"
-      ),
-      averageWorkHours: getSelectNumberValue("average-work-hours"),
-      minDuration: getSelectNumberValue("min-stay-days"),
-      requirements: getSelectedOptionValues(".required-option-btn"),
-      positionDescription: getTextareaValue("position-description"),
-      accommodations: getSelectedOptionValues(".accommodation-option-btn"),
-      meals: getSelectedOptionValues(".meal-option-btn"),
-      experiences: getSelectedOptionValues(".experience-option-btn"),
-      environments: getSelectedOptionValues(".environment-option-btn"),
-      benefitsDescription: getTextareaValue("benefits-description"),
-    };
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("前端準備上傳的 postData", postData);
-    }
+      );
+      let averageWorkHours = getSelectNumberValue("average-work-hours");
+      let minDuration = getSelectNumberValue("min-stay-days");
+      let accommodations = getSelectedOptionValues(".accommodation-option-btn");
+      if (
+        !(
+          startDate &&
+          endDate &&
+          recruitCount &&
+          positionName &&
+          positionCategories &&
+          averageWorkHours &&
+          minDuration &&
+          accommodations
+        )
+      ) {
+        const errorDialog = document.getElementById(
+          "error-dialog"
+        ) as HTMLDialogElement;
+        const errorMessage = document.querySelector(
+          ".error-message"
+        ) as HTMLDivElement;
+        errorMessage.textContent = "請輸入所有必填資訊";
+        errorDialog.showModal();
+        errorDialog.classList.add("show");
+        errorDialog.addEventListener(
+          "click",
+          createDialogClickHandler(errorDialog)
+        );
+        postWorkBtn.textContent = "發布";
+        postWorkBtn.disabled = false;
+        postWorkBtn.classList.remove("loading");
+        return;
+      }
 
-    // 將 WorkPost 資料存至資料庫
-    let WorkPostResponse = await fetch(`${API_BASE_URL}/api/works`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(postData),
-    });
-    const WorkPostResponseData: WorkPost = await WorkPostResponse.json();
-    if (import.meta.env.VITE_MODE == "development") {
-      console.log("前端收到 WorkPost 上傳 response", WorkPostResponseData);
+      updateProgress(40, "準備上傳圖片...");
+      // 將圖片上傳至 S3
+      const imageUrls: string[] = [];
+      if (imageFiles && imageFiles.length > 0) {
+        const uploadData = new FormData();
+        Array.from(imageFiles).forEach((imageFile) => {
+          uploadData.append("images", imageFile);
+        });
+        if (import.meta.env.VITE_MODE == "development") {
+          console.log("前端準備上傳的 img 檔案", uploadData.getAll("images"));
+        }
+
+        const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
+          method: "POST",
+          body: uploadData,
+        });
+        const { urls } = await uploadResponse.json();
+        imageUrls.push(...urls);
+        if (import.meta.env.VITE_MODE == "development") {
+          console.log("前端收到 imageUrls string list", imageUrls);
+        }
+      }
+      // 整理 WorkPost 資料
+      let postData: WorkPost = {
+        startDate: getInputValue("work-start-date"),
+        endDate: getInputValue("work-end-date"),
+        recruitCount: getSelectNumberValue("recruit-count"),
+        images: imageUrls,
+        positionName: getInputValue("position-name"),
+        positionCategories: getSelectedOptionValues(
+          ".position-category-option-btn"
+        ),
+        averageWorkHours: getSelectNumberValue("average-work-hours"),
+        minDuration: getSelectNumberValue("min-stay-days"),
+        requirements: getSelectedOptionValues(".required-option-btn"),
+        positionDescription: getTextareaValue("position-description"),
+        accommodations: getSelectedOptionValues(".accommodation-option-btn"),
+        meals: getSelectedOptionValues(".meal-option-btn"),
+        experiences: getSelectedOptionValues(".experience-option-btn"),
+        environments: getSelectedOptionValues(".environment-option-btn"),
+        benefitsDescription: getTextareaValue("benefits-description"),
+      };
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("前端準備上傳的 postData", postData);
+      }
+      updateProgress(70, "建立工作貼文...");
+      // 將 WorkPost 資料存至資料庫
+      let WorkPostResponse = await fetch(`${API_BASE_URL}/api/works`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(postData),
+      });
+      const WorkPostResponseData: WorkPost = await WorkPostResponse.json();
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("前端收到 WorkPost 上傳 response", WorkPostResponseData);
+      }
+      updateProgress(100, "上傳完成");
+      setTimeout(() => {
+        hideProgressBar();
+        const errorDialog = document.getElementById(
+          "error-dialog"
+        ) as HTMLDialogElement;
+        const errorMessage = document.querySelector(
+          ".error-message"
+        ) as HTMLDivElement;
+        errorMessage.textContent = "貼文發布成功！請至探索頁面查看";
+        errorDialog.showModal();
+        errorDialog.classList.add("show");
+        errorDialog.addEventListener(
+          "click",
+          createDialogClickHandler(errorDialog)
+        );
+      }, 800);
+    } catch (error) {
+      console.error("上傳失敗:", error);
+    } finally {
+      postWorkBtn.textContent = "發布";
+      postWorkBtn.disabled = false;
+      postWorkBtn.classList.remove("loading");
     }
   });
 }
+
+// 進度條控制函數
+function showProgressBar() {
+  const container = document.getElementById("upload-progress-container");
+  const progressBar = document.getElementById("upload-progress-bar");
+  const progressText = document.getElementById("upload-progress-text");
+
+  if (container && progressBar && progressText) {
+    container.style.display = "block";
+    progressBar.style.width = "0%";
+    progressText.textContent = "準備上傳...";
+  }
+}
+
+function updateProgress(percentage: number, text = "") {
+  const progressBar = document.getElementById("upload-progress-bar");
+  const progressText = document.getElementById("upload-progress-text");
+
+  if (progressBar) {
+    progressBar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+  }
+
+  if (progressText && text) {
+    progressText.textContent = text;
+  }
+}
+
+function hideProgressBar() {
+  const container = document.getElementById("upload-progress-container");
+  if (container) {
+    setTimeout(() => {
+      container.style.display = "none";
+    }, 500);
+  }
+}
+
 async function initBasicHelperProfile() {
   const originalProfileData: Record<string, string> = {};
   //渲染資料，並存入snapshot
