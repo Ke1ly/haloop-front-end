@@ -1,9 +1,7 @@
-//如果不是 helper 不准他進入
-//渲染訂閱條件
-//點擊訂閱條件，右側跳出訂閱條件的詳細內容，與符合條件的貼文
-
 // import { title } from "process";
 import { API_BASE_URL } from "../utils/config.js";
+import { getCurrentUser } from "../utils/authMe.js";
+
 interface Subscription {
   id: string;
   name: string;
@@ -28,10 +26,8 @@ let subscriptionsData: Subscription[] | null = null;
 async function getSubscriptions() {
   let response = await fetch(`${API_BASE_URL}/api/subscription`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch subscriptions");
   let data = await response.json();
@@ -96,15 +92,25 @@ async function renderSubscriptionDetails(subscriptionId: string) {
     const endDate = document.querySelector(".filter-end-date");
     const startDate = document.querySelector(".filter-start-date");
     if (startDate && endDate) {
-      if (filter.endDate || filter.startDate) {
-        if (!filter.endDate) {
-          startDate.textContent = `${filter.startDate} 之後的所有日期`;
-        } else if (!filter.startDate) {
-          endDate.textContent = `${filter.endDate} 以前的所有日期`;
-        } else {
-          startDate.textContent = `${filter.startDate}`;
-          endDate.textContent = `至 ${filter.endDate} 之間`;
-        }
+      if (filter.endDate && filter.startDate) {
+        const startDateISO = new Date(filter.startDate)
+          .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+          .split("T")[0];
+        const endDateISO = new Date(filter.endDate)
+          .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+          .split("T")[0];
+        startDate.textContent = `${startDateISO}`;
+        endDate.textContent = `至 ${endDateISO} 之間`;
+      } else if (filter.startDate) {
+        const startDateISO = new Date(filter.startDate)
+          .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+          .split("T")[0];
+        startDate.textContent = `${startDateISO} 之後的所有日期`;
+      } else if (filter.endDate) {
+        const endDateISO = new Date(filter.endDate)
+          .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+          .split("T")[0];
+        endDate.textContent = `${endDateISO} 以前的所有日期`;
       } else {
         startDate.textContent = ``;
         endDate.textContent = ``;
@@ -141,10 +147,10 @@ async function renderSubscriptionDetails(subscriptionId: string) {
       ".filter-average-work-hours"
     );
     if (averageWorkHours && filter.averageWorkHours) {
-      if (filter.minDuration) {
-        averageWorkHours.textContent = `每日工作 ${filter.averageWorkHours} 小時・`;
+      if (filter.averageWorkHours) {
+        averageWorkHours.textContent = `每日平均工時小於 ${filter.averageWorkHours} 小時・`;
       } else {
-        averageWorkHours.textContent = `每日工作 ${filter.averageWorkHours} 小時`;
+        averageWorkHours.textContent = `每日平均工時小於 ${filter.averageWorkHours} 小時`;
       }
     } else if (averageWorkHours && !filter.averageWorkHours) {
       averageWorkHours.textContent = ``;
@@ -209,10 +215,8 @@ async function renderSubscriptionDetails(subscriptionId: string) {
       `${API_BASE_URL}/api/subscription/matched-posts?id=${subscriptionId}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       }
     );
     if (!response.ok) throw new Error("無法取得匹配貼文");
@@ -273,7 +277,7 @@ async function renderSubscriptionDetails(subscriptionId: string) {
             ".avg-work-hours"
           ) as HTMLElement;
           if (avgWorkHours) {
-            avgWorkHours.textContent = `平均每日工時 ${postData.averageWorkHours} 小時｜`;
+            avgWorkHours.textContent = `每日平均工時小於 ${postData.averageWorkHours} 小時｜`;
           } else {
             if (import.meta.env.VITE_MODE == "development") {
               console.warn("Missing .avg-work-hours element in template");
@@ -407,23 +411,6 @@ async function renderSubscriptionDetails(subscriptionId: string) {
 
     const postsList = document.getElementById("matched-posts-list");
     if (postsList) postsList.textContent = "目前無符合的貼文";
-  }
-}
-
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) {
-    return null;
-  }
-  let data = await res.json();
-  if (data.success) {
-    return data;
-  } else {
-    return null;
   }
 }
 

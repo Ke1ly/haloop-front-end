@@ -2,16 +2,18 @@ import { connectToSocket, getConnectionStatus } from "./socketConnection.js";
 import { setupNotification } from "./notificationHandler.js";
 import { setupChat, initChatPage } from "../../pages/chat.js";
 import { debounce } from "lodash"; // 假設使用 lodash 的 debounce
+import { getCurrentUser } from "../../utils/authMe.js";
 
 type SocketConfig = {
-  token: string;
+  // token: string;
   userId: string;
   pageName: string;
 };
 
 export const initSocket = async (config: SocketConfig): Promise<void> => {
   // 檢查 token 是否存在
-  if (!config.token || !config.userId) {
+  const userData = await getCurrentUser();
+  if (!userData || !config.userId) {
     if (import.meta.env.VITE_MODE == "development") {
       console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
     }
@@ -46,7 +48,7 @@ export const initSocket = async (config: SocketConfig): Promise<void> => {
 const debouncedInitSocket = debounce(initSocket, 1000);
 document.addEventListener("DOMContentLoaded", async () => {
   const config: SocketConfig = {
-    token: localStorage.getItem("token") || "",
+    // token: getCurrentUser() || "",
     userId: localStorage.getItem("userId") || "",
     pageName: window.location.pathname,
   };

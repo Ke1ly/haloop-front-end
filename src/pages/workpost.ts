@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../utils/config.js";
 // import Litepicker from "litepicker";
 // import "litepicker/dist/css/litepicker.css";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
+import { getCurrentUser } from "../utils/authMe.js";
 
 function loadGoogleMaps(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -43,7 +44,7 @@ async function getWorkPost(): Promise<WorkPostForPageRender> {
   return data;
 }
 async function renderWorkPost(postData: WorkPostForPageRender) {
-  if (postData.unit.latitude !== null && postData.unit.longitude !== null) {
+  if (postData.unit.latitude && postData.unit.longitude) {
     const position = {
       lat: postData.unit.latitude,
       lng: postData.unit.longitude,
@@ -170,8 +171,12 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   const availableDates = document.querySelector(
     ".available-dates"
   ) as HTMLDivElement;
-  let start = new Date(postData.startDate).toISOString().split("T")[0];
-  let end = new Date(postData.endDate).toISOString().split("T")[0];
+  let start = new Date(postData.startDate)
+    .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+    .split("T")[0];
+  let end = new Date(postData.endDate)
+    .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+    .split("T")[0];
   availableDates.textContent = `開放於 ${start} 至  ${end}`;
 
   const unitAddress = document.querySelector(".unit-address") as HTMLDivElement;
@@ -197,8 +202,8 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   profileUnitName.textContent = postData.unit.unitName;
 
   const joinedAt = document.querySelector(".joined-at") as HTMLDivElement;
-  const joinDate = new Date(postData.unit.createdAt)
-    .toISOString()
+  const joinDate = new Date(postData.unit.user.createdAt)
+    .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
     .split("T")[0];
   joinedAt.textContent = `於 ${joinDate} 加入`;
 
@@ -231,8 +236,8 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   }
 
   sendMessageBtn.addEventListener("click", async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const userData = await getCurrentUser();
+    if (!userData) {
       const signInDialog = document.getElementById(
         "sign-in-dialog"
       ) as HTMLDialogElement;
@@ -243,28 +248,12 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
         createDialogClickHandler(signInDialog)
       );
       return;
-    } else {
-      const userData = await getCurrentUser();
-      if (!userData) {
-        const signInDialog = document.getElementById(
-          "sign-in-dialog"
-        ) as HTMLDialogElement;
-        signInDialog.showModal();
-        signInDialog.classList.add("show");
-        signInDialog.addEventListener(
-          "click",
-          createDialogClickHandler(signInDialog)
-        );
-        return;
-      }
     }
 
     let response = await fetch(`${API_BASE_URL}/api/chat/conversation`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({
         targetUserId: postData.unit.userId,
       }),
@@ -273,22 +262,6 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
     localStorage.setItem("activeConvId", coversationData.id);
     window.location.assign("/chat.html");
   });
-}
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) {
-    return null;
-  }
-  let data = await res.json();
-  if (data.success) {
-    return data;
-  } else {
-    return null;
-  }
 }
 
 async function initWorkPosts() {
@@ -304,82 +277,3 @@ async function initWorkPosts() {
     }
   }
 }
-
-//==================================================================
-
-// const availabilityData: { [date: string]: number } = {
-//   "2025-07-01": 2,
-//   "2025-07-02": 0,
-//   "2025-07-03": 3,
-//   "2025-07-04": 0,
-//   "2025-07-05": 1,
-// }; //測試資料
-// const response = await fetch(
-//   `${API_BASE_URL}/api/workpost/availability/:workpostId?startDate=${startStr}&endDate=${endStr}`
-// );
-// const availabilityData = await response.json();
-
-// new Litepicker({
-//   element: document.getElementById("calendar")!,
-//   inlineMode: true,
-//   singleMode: false,
-//   numberOfMonths: 1,
-//   numberOfColumns: 1,
-//   format: "YYYY-MM-DD",
-//   firstDay: 0,
-//   setup: (picker) => {
-//     picker.on("render", () => {
-//       const cells = document.querySelectorAll(".litepicker-day");
-
-//       cells.forEach((cell) => {
-//         const date = cell.getAttribute("data-time");
-//         if (!date) return;
-
-//         const day = new Date(Number(date));
-//         const dateStr = day.toISOString().split("T")[0];
-
-//         const remain = availabilityData[dateStr];
-
-//         if (remain === 0) {
-//           cell.classList.add("full");
-//           cell.classList.add("is-disabled");
-//         } else if (remain > 0) {
-//           cell.classList.add("available");
-//         } else {
-//           cell.classList.add("unavailable");
-//           cell.classList.add("is-disabled");
-//         }
-//       });
-//     });
-
-//     picker.on("selected", (start, end) => {
-//       const selectedStart = start.format("YYYY-MM-DD");
-//       const selectedEnd = end.format("YYYY-MM-DD");
-//       const dateList = getDateRangeArray(selectedStart, selectedEnd);
-
-//       const allAvailable = dateList.every((d) => availabilityData[d] > 0);
-
-//       const statusBox = document.getElementById("calendar-status")!;
-//       if (allAvailable) {
-//         statusBox.innerText = `此區間可申請！`;
-//         statusBox.style.color = "green";
-//       } else {
-//         statusBox.innerText = `選擇區間內有日期已滿或未開放`;
-//         statusBox.style.color = "red";
-//       }
-//     });
-//   },
-// });
-
-// // 建立區間內的日期陣列
-// function getDateRangeArray(startStr: string, endStr: string) {
-//   const list = [];
-//   let cur = new Date(startStr);
-//   const end = new Date(endStr);
-
-//   while (cur <= end) {
-//     list.push(cur.toISOString().split("T")[0]);
-//     cur.setDate(cur.getDate() + 1);
-//   }
-//   return list;
-// }

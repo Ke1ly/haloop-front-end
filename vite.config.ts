@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => ({
               target: "http://localhost:3000",
               changeOrigin: true,
               secure: false,
+              withCredentials: true,
             },
             "/socket.io": {
               target: "http://localhost:3000",

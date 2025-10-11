@@ -4,6 +4,9 @@ import {
   // emitSocketEvent,
 } from "../services/socket/socketConnection.js";
 import { debounce } from "lodash";
+import { getCurrentUser } from "../utils/authMe.js";
+import * as DOMPurifyLib from "dompurify";
+const DOMPurify = (DOMPurifyLib as any).default || DOMPurifyLib;
 
 import { API_BASE_URL } from "../utils/config.js";
 let currentUserId: string;
@@ -32,7 +35,6 @@ interface Conversation {
   otherUser: {
     id: string;
     username: string;
-    avatar?: string;
   };
   otherUserRole: "HOST" | "HELPER";
   lastMessage?: Message;
@@ -40,33 +42,11 @@ interface Conversation {
   unreadCount: number;
 }
 
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) {
-    return null;
-  }
-  let data = await res.json();
-  if (data.success) {
-    return data;
-  } else {
-    return null;
-  }
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.location.pathname.startsWith("/chat")) return;
-  const token = localStorage.getItem("token");
-  if (!token) {
+  const userData = await getCurrentUser();
+  if (!userData) {
     location.replace("/");
-  } else {
-    const userData = await getCurrentUser();
-    if (!userData) {
-      location.replace("/");
-    }
   }
 });
 
@@ -89,9 +69,19 @@ export async function initChatPage() {
   if (messageInputForm && messageInput) {
     messageInputForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (messageInput.value.trim()) {
-        sendMessage(messageInput.value);
+      const rawValue = messageInput.value.trim();
+      if (!rawValue) return;
+      const cleanValue = DOMPurify.sanitize(rawValue, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      });
+
+      if (cleanValue.length > 1000) {
+        alert("訊息過長");
+        return;
       }
+
+      sendMessage(messageInput.value);
     });
   }
   // 使用 Input 0.2ms，顯示輸入中
@@ -157,15 +147,13 @@ async function loadConversations(currentUserId: string) {
       `${API_BASE_URL}/api/chat/conversations/${currentUserId}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       }
     );
     conversations = await response.json();
     try {
       renderConversationList();
-      // initializeChatPage();
     } catch (e) {
       if (import.meta.env.VITE_MODE == "development") {
         console.error("渲染對話列表失敗", e);
@@ -205,11 +193,7 @@ function renderConversationList() {
     const avatarImg = conversationTemplateClone.querySelector(
       "img"
     ) as HTMLImageElement;
-    if (conv.otherUser.avatar) {
-      avatarImg.src = conv.otherUser.avatar;
-    } else {
-      avatarImg.src = "/img/user-default.png";
-    }
+    avatarImg.src = "/img/user-default.png";
 
     const conversationTitle = conversationTemplateClone.querySelector(
       ".conversation-title"
@@ -219,9 +203,14 @@ function renderConversationList() {
     const lastMessage = conversationTemplateClone.querySelector(
       ".last-message"
     ) as HTMLDivElement;
-    lastMessage.textContent = `${
-      conv.lastMessage ? conv.lastMessage.content : "暫無訊息"
-    }`;
+    if (conv.lastMessage && conv.lastMessage.content.length > 15) {
+      lastMessage.textContent = `${conv.lastMessage.content.slice(0, 15)}...`;
+    } else if (conv.lastMessage && conv.lastMessage.content.length <= 15) {
+      lastMessage.textContent = `${conv.lastMessage.content}`;
+    } else {
+      lastMessage.textContent = "暫無訊息";
+    }
+
     const timestamp = conversationTemplateClone.querySelector(
       ".timestamp"
     ) as HTMLDivElement;
@@ -460,9 +449,8 @@ async function openConversation(conversationId: string) {
       `${API_BASE_URL}/api/chat/messages/${conversationId}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       }
     );
     messages = await response.json();
@@ -479,7 +467,7 @@ function renderMessageHeader(conv: Conversation) {
     "header-other-avatar"
   ) as HTMLImageElement;
 
-  otherAvatar.src = `${conv.otherUser.avatar || "/img/user-default.png"}`;
+  otherAvatar.src = `${"/img/user-default.png"}`;
   const otherUserName = document.getElementById(
     "header-other-username"
   ) as HTMLDivElement;
@@ -551,19 +539,6 @@ function renderMessages() {
 
 // 點擊傳送按鈕，發送訊息 ===========================================================
 
-// const messageInputForm = document.getElementById(
-//   "message-input-form"
-// ) as HTMLFormElement;
-// const messageInput = document.getElementById(
-//   "message-input"
-// ) as HTMLTextAreaElement;
-// messageInputForm.addEventListener("submit", function (e) {
-//   e.preventDefault();
-//   if (messageInput && messageInput.value.trim()) {
-//     sendMessage(messageInput.value);
-//   }
-// });
-
 function sendMessage(
   content: string,
   messageType: "TEXT" | "IMAGE" | "FILE" = "TEXT"
@@ -582,16 +557,6 @@ function sendMessage(
   ) as HTMLTextAreaElement;
   if (messageInput) messageInput.value = "";
 }
-
-//===================================================//
-
-// messageInput.addEventListener("input", () => {
-//   const socket = getSocket();
-//   if (!socket) return;
-//   socket.emit("typing", { conversationId, isTyping: true });
-//   //使用防抖（debounce）機制，避免過頻繁發送 typing 事件。
-// });
-
 //===================================================//
 
 // 功能函式

@@ -4,13 +4,14 @@ import Litepicker from "litepicker";
 import "litepicker/dist/css/litepicker.css";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
 import { API_BASE_URL } from "../utils/config.js";
+import { getCurrentUser } from "../utils/authMe.js";
 
 //獲得要呈現在頁面上的所有貼文資料
 async function getWorkPosts(
   filter?: WorkPostFilterInput
 ): Promise<WorkPostForCardRender[]> {
   let workPostsData: WorkPostForCardRender[];
-  if (!filter) {
+  if (!filter || isFilterEmpty(filter)) {
     const response = await fetch(`${API_BASE_URL}/api/works`, {
       method: "GET",
     });
@@ -51,8 +52,9 @@ async function renderWorkPosts(
         ".work-post"
       ) as HTMLElement;
       postSection.dataset.unitId = postData.unit.id;
+      const debouncedHighlight = debounce(highlightMarker, 500);
       postSection.addEventListener("mouseenter", () => {
-        highlightMarker(postData.unit.id);
+        debouncedHighlight(postData.unit.id);
         postSection.classList.add("highlight");
       });
       postSection.addEventListener("mouseleave", () => {
@@ -229,6 +231,51 @@ async function renderWorkPosts(
   }
 }
 
+function areFiltersEqual(
+  filter1: WorkPostFilterInput | null | undefined,
+  filter2: WorkPostFilterInput | null | undefined
+): boolean {
+  if (isFilterEmpty(filter1) && isFilterEmpty(filter2)) return true;
+  if (!filter1 || !filter2) return false;
+  return (
+    filter1.city === filter2.city &&
+    filter1.startDate === filter2.startDate &&
+    filter1.endDate === filter2.endDate &&
+    filter1.applicantCount === filter2.applicantCount &&
+    JSON.stringify(filter1.positionCategories) ===
+      JSON.stringify(filter2.positionCategories) &&
+    filter1.averageWorkHours === filter2.averageWorkHours &&
+    filter1.minDuration === filter2.minDuration &&
+    JSON.stringify(filter1.accommodations) ===
+      JSON.stringify(filter2.accommodations) &&
+    JSON.stringify(filter1.meals) === JSON.stringify(filter2.meals) &&
+    JSON.stringify(filter1.experiences) ===
+      JSON.stringify(filter1.experiences) &&
+    JSON.stringify(filter1.environments) ===
+      JSON.stringify(filter2.environments)
+  );
+}
+
+function isFilterEmpty(
+  filter: WorkPostFilterInput | null | undefined
+): boolean {
+  if (!filter) return true;
+  return (
+    !filter.city &&
+    !filter.startDate &&
+    !filter.endDate &&
+    !filter.applicantCount &&
+    (!filter.positionCategories || filter.positionCategories.length === 0) &&
+    !filter.averageWorkHours &&
+    !filter.minDuration &&
+    (!filter.accommodations || filter.accommodations.length === 0) &&
+    (!filter.meals || filter.meals.length === 0) &&
+    (!filter.experiences || filter.experiences.length === 0) &&
+    (!filter.environments || filter.environments.length === 0)
+  );
+}
+
+let lastFilter: WorkPostFilterInput | null = null;
 //初始化（取貼文資料、渲染貼文、渲染圖片）
 async function initWorkPosts(filter?: WorkPostFilterInput) {
   try {
@@ -237,6 +284,19 @@ async function initWorkPosts(filter?: WorkPostFilterInput) {
       console.log("當前頁面渲染的 posts", postsData);
     }
     await renderWorkPosts(postsData, filter);
+    const userData = await getCurrentUser();
+    // const token = localStorage.getItem("token");
+    if (!userData) {
+      let anonCount = parseInt(localStorage.getItem("anonMapLoads") || "0", 10);
+      if (anonCount >= 5) {
+        document.getElementById("google-map")!.textContent =
+          "請登入以使用完整地圖服務";
+        return;
+      }
+      anonCount++;
+      localStorage.setItem("anonMapLoads", anonCount.toString());
+    }
+
     updateMarkers(postsData);
   } catch (error) {
     if (import.meta.env.VITE_MODE == "development") {
@@ -245,6 +305,13 @@ async function initWorkPosts(filter?: WorkPostFilterInput) {
   }
 }
 
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 //初始化搜尋
 function initFilter() {
   // 點擊篩選條件，跳出篩選視窗
@@ -271,6 +338,9 @@ function initFilter() {
     });
 
   // ＝＝＝＝＝＝＝＝＝＝＝＝點擊送出篩選＝＝＝＝＝＝＝＝＝＝＝＝
+  const debouncedInitWorkPosts = debounce(initWorkPosts, 1000);
+  let currentCity: string | null = null;
+
   const filterSearchBtn = document.getElementById(
     "start-filter-search-btn"
   ) as HTMLButtonElement;
@@ -278,11 +348,24 @@ function initFilter() {
     //取得並整理輸入資料
     const startDateStr = picker.getStartDate()?.format("YYYY-MM-DD");
     const endDateStr = picker.getEndDate()?.format("YYYY-MM-DD");
+    // 轉成 UTC ISO 格式
+    let startDateISO: string | undefined;
+    let endDateISO: string | undefined;
+    if (startDateStr) {
+      startDateISO = new Date(`${startDateStr}T00:00:00Z`).toISOString();
+    } else {
+      startDateISO = undefined;
+    }
+    if (endDateStr) {
+      endDateISO = new Date(`${endDateStr}T00:00:00Z`).toISOString();
+    } else {
+      endDateISO = undefined;
+    }
     let filter: WorkPostFilterInput = {
       applicantCount: getSelectNumberValue("applicant-count"),
       city: getSelectedCity(),
-      startDate: startDateStr,
-      endDate: endDateStr,
+      startDate: startDateISO,
+      endDate: endDateISO,
       positionCategories: getSelectedOptionValues(
         ".position-category-option-btn"
       ),
@@ -293,11 +376,28 @@ function initFilter() {
       experiences: getSelectedOptionValues(".experience-option-btn"),
       environments: getSelectedOptionValues(".environment-option-btn"),
     };
+    const finalFilter = isFilterEmpty(filter) ? null : filter;
 
-    initWorkPosts(filter); // 將 filter 轉為 QueryString 重新發送 Get 貼文資料、根據取得的結果，重新渲染頁面
-    if (filter.city) {
-      zoomToCity(map, filter.city);
+    if (areFiltersEqual(finalFilter, lastFilter)) {
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("filter 相同，不再重新渲染！");
+      }
+      filterDialog.close();
+      filterDialog.classList.remove("show");
+      return;
     }
+    lastFilter = finalFilter;
+
+    debouncedInitWorkPosts(filter); // 將 filter 轉為 QueryString 重新發送 Get 貼文資料、根據取得的結果，重新渲染頁面
+    if (filter.city && filter.city !== currentCity) {
+      zoomToCity(map, filter.city);
+      currentCity = filter.city;
+    } else {
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("zoomToCity 相同，不再重新渲染");
+      }
+    }
+
     filterDialog.close();
     filterDialog.classList.remove("show");
     initSearchSummary();
@@ -309,36 +409,53 @@ function initFilter() {
     //取得並整理輸入資料
     const startDateStr = picker.getStartDate()?.format("YYYY-MM-DD");
     const endDateStr = picker.getEndDate()?.format("YYYY-MM-DD");
+    // 轉成 UTC ISO 格式
+    let startDateISO: string | undefined;
+    let endDateISO: string | undefined;
+    if (startDateStr) {
+      startDateISO = new Date(`${startDateStr}T00:00:00Z`).toISOString();
+    } else {
+      startDateISO = undefined;
+    }
+    if (endDateStr) {
+      endDateISO = new Date(`${endDateStr}T00:00:00Z`).toISOString();
+    } else {
+      endDateISO = undefined;
+    }
 
     let filter: WorkPostFilterInput = {
       applicantCount: getSelectNumberValue("applicant-count"),
       city: getSelectedCity(),
-      startDate: startDateStr,
-      endDate: endDateStr,
+      startDate: startDateISO,
+      endDate: endDateISO,
     };
 
-    initWorkPosts(filter); // filter 轉為 QueryString 重新發送 Get 貼文資料、根據取得的結果，重新渲染頁面
-    if (filter.city) {
+    const finalFilter = isFilterEmpty(filter) ? null : filter;
+
+    if (areFiltersEqual(finalFilter, lastFilter)) {
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("filter 相同，不再重新渲染！");
+      }
+      filterDialog.close();
+      filterDialog.classList.remove("show");
+      return;
+    }
+
+    lastFilter = filter;
+
+    debouncedInitWorkPosts(filter); // filter 轉為 QueryString 重新發送 Get 貼文資料、根據取得的結果，重新渲染頁面
+    if (filter.city && filter.city !== currentCity) {
       zoomToCity(map, filter.city);
+      currentCity = filter.city;
+    } else {
+      if (import.meta.env.VITE_MODE == "development") {
+        console.log("zoomToCity 相同，不再重新渲染");
+      }
     }
     initSearchSummary();
   });
 }
 initFilter();
-
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  let data = await res.json();
-  if (data.success) {
-    return data;
-  } else {
-    return null;
-  }
-}
 
 //初始化訂閱按鈕渲染與否
 const filterSubscriptionBtn = document.getElementById(
@@ -349,24 +466,18 @@ const filterSubscriptionCta = document.getElementById(
 ) as HTMLButtonElement;
 
 async function initSubscriptionBtn() {
-  let token = localStorage.getItem("token");
-  if (!token || token == "undefined") {
-    filterSubscriptionBtn.style.display = "none";
-    filterSubscriptionCta.style.display = "none";
-  } else {
-    const userData = await getCurrentUser();
-    if (userData) {
-      if (userData.user.userType == "HELPER") {
-        filterSubscriptionBtn.style.display = "inline-block";
-        filterSubscriptionCta.style.display = "block";
-      } else {
-        filterSubscriptionBtn.style.display = "none";
-        filterSubscriptionCta.style.display = "none";
-      }
+  const userData = await getCurrentUser();
+  if (userData) {
+    if (userData.user.userType == "HELPER") {
+      filterSubscriptionBtn.style.display = "inline-block";
+      filterSubscriptionCta.style.display = "block";
     } else {
       filterSubscriptionBtn.style.display = "none";
       filterSubscriptionCta.style.display = "none";
     }
+  } else {
+    filterSubscriptionBtn.style.display = "none";
+    filterSubscriptionCta.style.display = "none";
   }
 }
 initSubscriptionBtn();
@@ -387,7 +498,6 @@ let currentFilter: WorkPostFilterInput | null = null;
     if (errorMessage) {
       errorMessage.textContent = "";
     }
-    //關閉原本的 advanced-search dialog
 
     //取得訂閱輸入資料，渲染於 dialog
     const startDateStr = picker.getStartDate()?.format("YYYY-MM-DD");
@@ -453,6 +563,11 @@ let currentFilter: WorkPostFilterInput | null = null;
       createDialogClickHandler(subscriptionDialog)
     );
     renderFilterDtails(currentFilter);
+
+    currentFilter.startDate = new Date(
+      `${startDateStr}T00:00:00Z`
+    ).toISOString();
+    currentFilter.endDate = new Date(`${endDateStr}T00:00:00Z`).toISOString();
   });
 });
 
@@ -486,10 +601,12 @@ if (confirmBtn) {
       //將資料存入後端
       let res = await fetch(`${API_BASE_URL}/api/subscription`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        // headers: {
+        //   "Content-Type": "application/json",
+        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // },
         body: JSON.stringify(currentFilter),
       });
       if (!res.ok) throw new Error("Failed to update subscriptions");
@@ -541,7 +658,9 @@ function toQueryString(params: Record<string, any>): string {
     if (value === undefined || value === null || value === "") continue;
 
     if (Array.isArray(value)) {
-      value.forEach((v) => query.append(key, v));
+      if (value.length > 0) {
+        value.forEach((v) => query.append(key, v));
+      }
     } else {
       query.append(key, value);
     }
@@ -551,7 +670,7 @@ function toQueryString(params: Record<string, any>): string {
 }
 
 //取值 select 轉數字
-function getSelectNumberValue(id: string): number {
+function getSelectNumberValue(id: string) {
   const el = document.getElementById(id);
   if (el && el instanceof HTMLSelectElement) {
     const value = el.value;
@@ -560,7 +679,7 @@ function getSelectNumberValue(id: string): number {
       return num;
     }
   }
-  return 0; // 預設值
+  return undefined;
 }
 
 //取值多選
@@ -628,7 +747,12 @@ function loadGoogleMaps(): Promise<void> {
   });
 }
 
+let mapInitialized = false;
 function initMap() {
+  if (mapInitialized) {
+    console.log("map 已經初始化，不再重新初始化");
+    return;
+  }
   const mapOptions: google.maps.MapOptions = {
     zoom: 8,
     disableDefaultUI: true,
@@ -640,6 +764,7 @@ function initMap() {
     document.getElementById("google-map") as HTMLElement,
     mapOptions
   );
+  mapInitialized = true;
 }
 
 loadGoogleMaps()
@@ -652,7 +777,7 @@ loadGoogleMaps()
 function updateMarkers(postsData: WorkPostForCardRender[]) {
   const newIds = new Set(postsData.map((post) => post.unit.id));
 
-  // 刪除不需要的 marker
+  // 刪除不存在的貼文的 marker
   for (const [id, marker] of markerMap) {
     if (!newIds.has(id)) {
       marker.map = null;
@@ -663,19 +788,21 @@ function updateMarkers(postsData: WorkPostForCardRender[]) {
   // 新增新的 marker
   postsData.forEach((post) => {
     if (!markerMap.has(post.unit.id)) {
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: post.unit.latitude, lng: post.unit.longitude },
-        map,
-        title: post.unit.unitName,
-        content: createDefaultMarkerElement(),
-      });
+      if (post.unit.latitude && post.unit.longitude) {
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: post.unit.latitude, lng: post.unit.longitude },
+          map,
+          title: post.unit.unitName,
+          content: createDefaultMarkerElement(),
+        });
 
-      marker.addListener("gmp-click", () => {
-        highlightCard(post.unit.id);
-        markerMap.forEach((m) => (m.content = createDefaultMarkerElement()));
-        marker.content = createClickedMarkerElement();
-      });
-      markerMap.set(post.unit.id, marker);
+        marker.addListener("gmp-click", () => {
+          highlightCard(post.unit.id);
+          markerMap.forEach((m) => (m.content = createDefaultMarkerElement()));
+          marker.content = createClickedMarkerElement();
+        });
+        markerMap.set(post.unit.id, marker);
+      }
     }
   });
 }
@@ -714,27 +841,67 @@ function createClickedMarkerElement(): HTMLElement {
   return i;
 }
 
+const cityCache = new Map<string, google.maps.LatLngLiteral>([
+  ["基隆市", { lat: 25.1283, lng: 121.7419 }],
+  ["臺北市", { lat: 25.033, lng: 121.5654 }],
+  ["新北市", { lat: 25.0111, lng: 121.4458 }],
+  ["桃園市", { lat: 24.9936, lng: 121.3009 }],
+  ["新竹市", { lat: 24.8036, lng: 120.9687 }],
+  ["新竹縣", { lat: 24.8383, lng: 121.0179 }],
+  ["苗栗縣", { lat: 24.5602, lng: 120.8214 }],
+  ["臺中市", { lat: 24.1374, lng: 120.6869 }],
+  ["彰化縣", { lat: 24.0817, lng: 120.5385 }],
+  ["南投縣", { lat: 23.9597, lng: 120.6853 }],
+  ["雲林縣", { lat: 23.7092, lng: 120.4313 }],
+  ["嘉義縣", { lat: 23.4812, lng: 120.4531 }],
+  ["嘉義市", { lat: 23.48, lng: 120.4497 }],
+  ["臺南市", { lat: 22.9999, lng: 120.227 }],
+  ["高雄市", { lat: 22.6273, lng: 120.3014 }],
+  ["屏東縣", { lat: 22.6683, lng: 120.4879 }],
+  ["宜蘭縣", { lat: 24.7536, lng: 121.7535 }],
+  ["花蓮縣", { lat: 23.9769, lng: 121.6044 }],
+  ["臺東縣", { lat: 22.7583, lng: 121.1444 }],
+  ["澎湖縣", { lat: 23.5654, lng: 119.6151 }],
+  ["金門縣", { lat: 24.4321, lng: 118.3171 }],
+  ["連江縣", { lat: 26.1602, lng: 119.9499 }],
+]);
+
 function zoomToCity(map: google.maps.Map, city: string) {
-  const geocoder = new google.maps.Geocoder();
+  if (!city) return;
 
-  geocoder.geocode({ address: city }, (results, status) => {
-    if (status === "OK" && results && results[0]) {
-      const result = results[0];
+  if (cityCache.has(city)) {
+    console.log(
+      `cityCache 已經有 ${city} 位置資料：`,
+      `${cityCache.get(city)}`
+    );
+    map.setCenter(cityCache.get(city)!);
+    map.setZoom(10);
+    return;
+  }
 
-      // 調整地圖視野到城市的邊界範圍
-      const viewport = result.geometry.viewport;
-      if (viewport) {
-        map.fitBounds(viewport); // 自動調整 zoom 與 center
-      } else {
-        map.setCenter({ lat: 23.8, lng: 121 });
-        map.setZoom(10);
-      }
-    } else {
-      if (import.meta.env.VITE_MODE == "development") {
-        console.error("Geocode error:", status);
-      }
-    }
-  });
+  // const geocoder = new google.maps.Geocoder();
+  // geocoder.geocode({ address: city }, (results, status) => {
+  //   if (status === "OK" && results && results[0]) {
+  //     const { lat, lng } = results[0].geometry.location.toJSON();
+  //     cityCache.set(city, { lat, lng });
+  //     map.setCenter({ lat, lng });
+  //     map.setZoom(10);
+
+  // const result = results[0];
+  // 調整地圖視野到城市的邊界範圍
+  // const viewport = result.geometry.viewport;
+  // if (viewport) {
+  //   map.fitBounds(viewport); // 自動調整 zoom 與 center
+  // } else {
+  //   map.setCenter({ lat: 23.8, lng: 121 });
+  //   map.setZoom(10);
+  // }
+  // } else {
+  //   if (import.meta.env.VITE_MODE == "development") {
+  //     console.error("Geocode error:", status);
+  //   }
+  // }
+  // });
 }
 
 //================================================
@@ -835,7 +1002,6 @@ function renderFilterDtails(filter: WorkPostFilterInput) {
   ) as HTMLElement;
 
   const endDate = filterDetailArea.querySelector(".filter-end-date");
-
   const startDate = filterDetailArea.querySelector(".filter-start-date");
   if (startDate && endDate) {
     if (filter.endDate || filter.startDate) {

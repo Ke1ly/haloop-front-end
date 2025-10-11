@@ -83,22 +83,25 @@ body > main > section#main-wrap > section.right > section#indicators {
 }
 
 body > main > section#main-wrap > section.right > section#forms-container {
-  margin-top: 30px;
+  margin-top: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 220px);
   button.next-page,
   button.prev-page {
     position: absolute;
-
-    bottom: 20px;
+    bottom: 0px;
     border: none;
     background: none;
     i {
       cursor: pointer;
-      font-size: 30px;
+      font-size: 36px;
+      transition: all 0.1s ease-in;
+      &:hover {
+        transform: scale(1.1);
+      }
     }
   }
   button.next-page {
@@ -106,6 +109,11 @@ body > main > section#main-wrap > section.right > section#forms-container {
   }
   button.prev-page {
     left: 20px;
+  }
+
+  h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
   }
 }
 
@@ -120,6 +128,7 @@ body
   align-items: center;
   div.button-wrap {
     button.sign-up-role {
+      font-size: 16px;
       margin: 5px 2px;
       padding: 8px 15px;
       border: 1px solid #cccccc;
@@ -136,7 +145,7 @@ body
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 15px;
   }
 }
 body
@@ -154,6 +163,7 @@ body
     display: flex;
     flex-direction: column;
     input {
+      font-size: 16px;
       width: 250px;
       margin-top: 10px;
       margin-bottom: 5px;
@@ -170,7 +180,7 @@ body
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 20px;
   }
 }
 
@@ -189,7 +199,8 @@ body
     flex-direction: column;
     input,
     textarea {
-      width: 250px;
+      font-size: 16px;
+      width: 350px;
       margin-top: 10px;
       margin-bottom: 5px;
       padding: 15px;
@@ -215,20 +226,27 @@ body
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 20px;
   }
   button.sign-up-submit-btn {
     width: 80px;
     border: none;
     background: none;
-    padding: 15px 15px;
-    background-color: rgb(235, 235, 235);
-    border-radius: 15px;
+    padding: 10px 20px;
+    background-color: rgb(0, 0, 0);
+    color: white;
+    border-radius: 20px;
     cursor: pointer;
+    font-size: 15px;
 
     position: absolute;
     right: 20px;
-    bottom: 20px;
+    bottom: 0px;
+    transition: all 0.1s ease-in;
+    &:hover {
+      transform: scale(1.02);
+      background-color: rgb(84, 78, 78);
+    }
   }
 }
 body > main > section#main-wrap > section.right > div#switch-to-login {

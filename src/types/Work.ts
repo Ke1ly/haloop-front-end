@@ -66,9 +66,9 @@ export interface WorkPostForPageRender {
     unitDescription?: string;
     latitude: number;
     longitude: number;
-    createdAt: Date;
     user: {
       lastLoginAt: Date;
+      createdAt: Date;
     };
   };
 }

@@ -13,9 +13,11 @@
     "@types/lodash": "^4.17.20",
     "@types/node": "^22.15.31",
     "typescript": "5.8.3",
-    "vite": "6.3.5"
+    "vite": "^7.1.9"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.2.7",
     "litepicker": "^2.0.12",
     "lodash": "^4.17.21",
     "socket.io-client": "^4.8.1"

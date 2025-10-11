@@ -1,5 +1,6 @@
 import type { WorkPostForCardRender } from "../types/Work";
 import { API_BASE_URL } from "../utils/config.js";
+import { getCurrentUser } from "../utils/authMe.js";
 
 // 取得並渲染推薦貼文
 async function getRecommWorkPosts(): Promise<WorkPostForCardRender[]> {
@@ -7,9 +8,8 @@ async function getRecommWorkPosts(): Promise<WorkPostForCardRender[]> {
     `${API_BASE_URL}/api/subscription/recommendations`,
     {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     }
   );
   if (!response.ok) throw new Error("Failed to fetch work posts");
@@ -18,20 +18,6 @@ async function getRecommWorkPosts(): Promise<WorkPostForCardRender[]> {
     console.log("當前頁面 recommendation posts", data);
   }
   return data.formattedWorkPosts;
-}
-
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  let data = await res.json();
-  if (data.success) {
-    return data.user;
-  } else {
-    return null;
-  }
 }
 
 function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
@@ -128,19 +114,14 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
   });
 }
 async function initRecommendationSection() {
-  const token = localStorage.getItem("token");
-  if (token && token != "undefined") {
-    let userData = await getCurrentUser();
-    if (userData.userType == "HELPER") {
-      initRecommendation();
+  let userData = await getCurrentUser();
+  if (userData && userData.userType == "HELPER") {
+    initRecommendation();
 
-      const helperName = document.querySelector(
-        ".helper-name"
-      ) as HTMLParagraphElement;
-      helperName.textContent = `Hello, ${userData.username}!`;
-    }
-  } else {
-    //放熱門貼文
+    const helperName = document.querySelector(
+      ".helper-name"
+    ) as HTMLParagraphElement;
+    helperName.textContent = `Hello, ${userData.username}!`;
   }
 }
 initRecommendationSection();
@@ -198,7 +179,7 @@ function autoScroll() {
 // 啟動滾動
 autoScroll();
 
-// 可選：滑鼠懸停時暫停滾動
+// 滑鼠懸停時暫停滾動
 container.addEventListener("mouseenter", () => {
   cancelAnimationFrame(animationFrame);
 });

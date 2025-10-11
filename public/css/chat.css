@@ -57,13 +57,13 @@ body > section#chat-container > section#conversations-sidebar {
       }
       div.conversation-item-middle {
         flex-grow: 1;
-        flex-basis: 100px;
+        flex-basis: 150px;
         /* border: 1px solid #cf3333; */
 
-        margin: 0px 15px;
+        margin: 0px 10px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+
         div.conversation-info {
           display: flex;
           flex-direction: row;
@@ -82,14 +82,17 @@ body > section#chat-container > section#conversations-sidebar {
           display: flex;
           flex-direction: row;
           align-items: center;
-          font-size: 14px;
+          justify-content: space-between;
+
+          font-size: 13px;
           color: #909090;
 
           div.last-message {
             overflow-y: hidden;
           }
           div.timestamp {
-            margin-left: 10px;
+            font-size: 12px;
+            margin-left: 5px;
           }
         }
       }

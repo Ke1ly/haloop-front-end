@@ -1,8 +1,9 @@
 import { io, Socket } from "socket.io-client";
 import { API_BASE_URL } from "../../utils/config";
+import { getCurrentUser } from "../../utils/authMe.js";
 
 type SocketConfig = {
-  token: string;
+  // token: string;
   userId: string;
   pageName: string;
 };
@@ -62,22 +63,22 @@ const triggerEvent = (event: SocketEvent): void => {
 
 // 初始化連線：連線、斷線、錯誤處理、註冊事件
 export const connectToSocket = (config: SocketConfig): Promise<void> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     socketState.config = config;
-
-    if (!config.token || !config.userId) {
+    const userData = await getCurrentUser();
+    if (!userData || !config.userId) {
       if (import.meta.env.VITE_MODE == "development") {
         console.warn("未提供有效的 token 或 userId，無法初始化 Socket");
       }
       return;
     }
-
+    // 若已存在舊的連線，先斷開
     if (socketState.socket?.connected) {
       socketState.socket.disconnect();
     }
 
     socketState.socket = io(`${API_BASE_URL}`, {
-      auth: { token: config.token },
+      withCredentials: true,
       // query: { page: config.pageName },
       transports: ["websocket", "polling"],
       reconnection: false,

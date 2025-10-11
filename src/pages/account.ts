@@ -1,24 +1,9 @@
 import type { WorkPost } from "../types/Work.js";
 import { createDialogClickHandler } from "../utils/dialog-utils.js";
 import { API_BASE_URL } from "../utils/config.js";
-
-//用 token 取得當前使用者資訊
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) {
-    return null;
-  }
-  let data = await res.json();
-  if (data.success) {
-    return data;
-  } else {
-    return null;
-  }
-}
+import { getCurrentUser } from "../utils/authMe.js";
+import * as DOMPurifyLib from "dompurify";
+const DOMPurify = (DOMPurifyLib as any).default || DOMPurifyLib;
 
 // 根據角色渲染 profile
 async function initProfileByRole() {
@@ -38,14 +23,6 @@ async function initProfileByRole() {
   const helperBasicSection = document.getElementById(
     "helper-basic-section"
   ) as HTMLElement;
-  [hostProfileBtn, basicProfileBtn].forEach((button) => {
-    button.addEventListener("click", () => {
-      [hostProfileBtn, basicProfileBtn].forEach((btn) => {
-        btn.classList.remove("selected");
-      });
-      button.classList.add("selected");
-    });
-  });
   if (userData) {
     if (userData.user.userType == "HELPER") {
       helperBasicSection.style.display = "flex";
@@ -64,6 +41,14 @@ async function initProfileByRole() {
         hostBasicSection.style.display = "flex";
         hostProfileSection.style.display = "none";
         helperBasicSection.style.display = "none";
+      });
+      [hostProfileBtn, basicProfileBtn].forEach((button) => {
+        button.addEventListener("click", () => {
+          [hostProfileBtn, basicProfileBtn].forEach((btn) => {
+            btn.classList.remove("selected");
+          });
+          button.classList.add("selected");
+        });
       });
     } else {
       location.replace("/");
@@ -84,118 +69,37 @@ function initHostProfile() {
       });
     });
 
-  // workpost 驗證時間先後
-  const endInput = document.getElementById("work-end-date") as HTMLInputElement;
-  endInput.addEventListener("change", () => {
-    const startDate = document.getElementById(
-      "work-start-date"
-    ) as HTMLInputElement;
-    const start = new Date(startDate.value);
-    const end = new Date(endInput.value);
-    if (end <= start) {
-      alert("結束時間必須大於起始時間！");
-    }
-  });
   // workpost 圖片預覽
   const fileInput = document.getElementById(
     "host-img-input"
   ) as HTMLInputElement;
   const previewArea = document.getElementById("img-preview") as HTMLElement;
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   fileInput.addEventListener("change", function () {
     if (!fileInput.files) return;
     const files = Array.from(fileInput.files);
     previewArea.replaceChildren();
-    if (files.length > 0) {
-      files.forEach((file) => {
-        if (!allowedTypes.includes(file.type)) {
-          const errorDialog = document.getElementById(
-            "error-dialog"
-          ) as HTMLDialogElement;
-          const errorMessage = document.querySelector(
-            ".error-message"
-          ) as HTMLDivElement;
-          errorMessage.textContent = "僅支援 JPG、PNG、WEBP 圖片";
-          errorDialog.showModal();
-          errorDialog.classList.add("show");
-          errorDialog.addEventListener(
-            "click",
-            createDialogClickHandler(errorDialog)
-          );
-          return;
-        }
 
-        if (files.length < 3 || files.length > 8) {
-          const errorDialog = document.getElementById(
-            "error-dialog"
-          ) as HTMLDialogElement;
-          const errorMessage = document.querySelector(
-            ".error-message"
-          ) as HTMLDivElement;
-          errorMessage.textContent = "請選擇至少 3 張，至多 8 張照片";
-          errorDialog.showModal();
-          errorDialog.classList.add("show");
-          errorDialog.addEventListener(
-            "click",
-            createDialogClickHandler(errorDialog)
-          );
-          fileInput.replaceChildren();
-          return;
-        } else {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            if (typeof e.target?.result === "string") {
-              const img = document.createElement("img") as HTMLImageElement;
-              img.src = e.target.result;
-              previewArea.appendChild(img);
-            }
-          };
-          reader.readAsDataURL(file);
-        }
+    if (files.length > 0) {
+      const errors = validateFilesInput(files);
+      if (errors && errors.length > 0) {
+        renderErrors(errors);
+        fileInput.replaceChildren();
+        return;
+      }
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          if (typeof e.target?.result === "string") {
+            const img = document.createElement("img") as HTMLImageElement;
+            img.src = e.target.result;
+            previewArea.appendChild(img);
+          }
+        };
+        reader.readAsDataURL(file);
       });
     }
   });
-
-  // workpost 取值函式
-  function getInputValue(id: string): string {
-    const el = document.getElementById(id) as HTMLInputElement | null;
-    return el?.value.trim() || "";
-  }
-
-  // workpost 取值函式
-  function getTextareaValue(id: string): string {
-    const el = document.getElementById(id) as HTMLTextAreaElement | null;
-    return el?.value.trim() || "";
-  }
-
-  // workpost 取值函式
-  function getSelectNumberValue(id: string): number {
-    const el = document.getElementById(id);
-    if (el && el instanceof HTMLSelectElement) {
-      const value = el.value;
-      const num = parseInt(value, 10);
-      if (!isNaN(num)) {
-        return num;
-      }
-    }
-    return 0;
-  }
-
-  // workpost 取值函式
-  function getSelectedOptionValues(selector: string): string[] {
-    const result: string[] = [];
-    const selectedButtons = document.querySelectorAll(`${selector}.selected`);
-
-    selectedButtons.forEach((btn) => {
-      const element = btn as HTMLElement;
-      const name = element.dataset.value;
-      if (name) {
-        result.push(name);
-      }
-    });
-    return result;
-  }
 
   // 點擊按鈕，上傳貼文
   const postWorkBtn = document.getElementById(
@@ -204,62 +108,68 @@ function initHostProfile() {
   postWorkBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     if (postWorkBtn.disabled) return;
-    postWorkBtn.textContent = "上傳中";
-    postWorkBtn.disabled = true;
-    postWorkBtn.classList.add("loading");
+    changeBtnToUploading(postWorkBtn);
 
     try {
       showProgressBar();
       updateProgress(20, "驗證資料中...");
 
+      let postData: WorkPost = {
+        startDate: getInputValue("work-start-date"),
+        endDate: getInputValue("work-end-date"),
+        recruitCount: getSelectNumberValue("recruit-count"),
+        positionName: sanitizeText(getInputValue("position-name")),
+        positionCategories: getSelectedOptionValues(
+          ".position-category-option-btn"
+        ),
+        images: [],
+        averageWorkHours: getSelectNumberValue("average-work-hours"),
+        minDuration: getSelectNumberValue("min-stay-days"),
+        requirements: getSelectedOptionValues(".required-option-btn"),
+        positionDescription: sanitizeText(
+          getTextareaValue("position-description")
+        ),
+        accommodations: getSelectedOptionValues(".accommodation-option-btn"),
+        meals: getSelectedOptionValues(".meal-option-btn"),
+        experiences: getSelectedOptionValues(".experience-option-btn"),
+        environments: getSelectedOptionValues(".environment-option-btn"),
+        benefitsDescription: sanitizeText(
+          getTextareaValue("benefits-description")
+        ),
+      };
+      //驗證貼文內容
+      const errors = validateWorkPostInput(postData);
+      if (errors.length > 0) {
+        renderErrors(errors);
+        changeBtnToNormal(postWorkBtn);
+        hideProgressBar();
+        return;
+      }
+      postData.startDate = new Date(
+        `${postData.startDate}T00:00:00Z`
+      ).toISOString();
+      postData.endDate = new Date(
+        `${postData.endDate}T00:00:00Z`
+      ).toISOString();
+
+      //驗證圖片
       const imageInput = document.getElementById(
         "host-img-input"
       ) as HTMLInputElement;
-      const imageFiles = imageInput.files;
-      let startDate = getInputValue("work-start-date");
-      let endDate = getInputValue("work-end-date");
-      let recruitCount = getSelectNumberValue("recruit-count");
-      let positionName = getInputValue("position-name");
-      let positionCategories = getSelectedOptionValues(
-        ".position-category-option-btn"
-      );
-      let averageWorkHours = getSelectNumberValue("average-work-hours");
-      let minDuration = getSelectNumberValue("min-stay-days");
-      let accommodations = getSelectedOptionValues(".accommodation-option-btn");
-      if (
-        !(
-          startDate &&
-          endDate &&
-          recruitCount &&
-          positionName &&
-          positionCategories &&
-          averageWorkHours &&
-          minDuration &&
-          accommodations
-        )
-      ) {
-        const errorDialog = document.getElementById(
-          "error-dialog"
-        ) as HTMLDialogElement;
-        const errorMessage = document.querySelector(
-          ".error-message"
-        ) as HTMLDivElement;
-        errorMessage.textContent = "請輸入所有必填資訊";
-        errorDialog.showModal();
-        errorDialog.classList.add("show");
-        errorDialog.addEventListener(
-          "click",
-          createDialogClickHandler(errorDialog)
-        );
-        postWorkBtn.textContent = "發布";
-        postWorkBtn.disabled = false;
-        postWorkBtn.classList.remove("loading");
+      // const imageFiles = imageInput.files;
+      const imageFiles = imageInput.files ? Array.from(imageInput.files) : [];
+      const fileErrors = validateFilesInput(imageFiles);
+      if (fileErrors.length > 0) {
+        renderErrors(fileErrors);
+        changeBtnToNormal(postWorkBtn);
+        hideProgressBar();
         return;
       }
 
-      updateProgress(40, "準備上傳圖片...");
       // 將圖片上傳至 S3
+      updateProgress(40, "準備上傳圖片...");
       const imageUrls: string[] = [];
+
       if (imageFiles && imageFiles.length > 0) {
         const uploadData = new FormData();
         Array.from(imageFiles).forEach((imageFile) => {
@@ -268,7 +178,6 @@ function initHostProfile() {
         if (import.meta.env.VITE_MODE == "development") {
           console.log("前端準備上傳的 img 檔案", uploadData.getAll("images"));
         }
-
         const uploadResponse = await fetch(`${API_BASE_URL}/api/uploads`, {
           method: "POST",
           body: uploadData,
@@ -279,66 +188,37 @@ function initHostProfile() {
           console.log("前端收到 imageUrls string list", imageUrls);
         }
       }
-      // 整理 WorkPost 資料
-      let postData: WorkPost = {
-        startDate: getInputValue("work-start-date"),
-        endDate: getInputValue("work-end-date"),
-        recruitCount: getSelectNumberValue("recruit-count"),
-        images: imageUrls,
-        positionName: getInputValue("position-name"),
-        positionCategories: getSelectedOptionValues(
-          ".position-category-option-btn"
-        ),
-        averageWorkHours: getSelectNumberValue("average-work-hours"),
-        minDuration: getSelectNumberValue("min-stay-days"),
-        requirements: getSelectedOptionValues(".required-option-btn"),
-        positionDescription: getTextareaValue("position-description"),
-        accommodations: getSelectedOptionValues(".accommodation-option-btn"),
-        meals: getSelectedOptionValues(".meal-option-btn"),
-        experiences: getSelectedOptionValues(".experience-option-btn"),
-        environments: getSelectedOptionValues(".environment-option-btn"),
-        benefitsDescription: getTextareaValue("benefits-description"),
-      };
+      postData.images = imageUrls;
+
       if (import.meta.env.VITE_MODE == "development") {
         console.log("前端準備上傳的 postData", postData);
       }
       updateProgress(70, "建立工作貼文...");
       // 將 WorkPost 資料存至資料庫
-      let WorkPostResponse = await fetch(`${API_BASE_URL}/api/works`, {
+      let response = await fetch(`${API_BASE_URL}/api/works`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(postData),
       });
-      const WorkPostResponseData: WorkPost = await WorkPostResponse.json();
+      if (!response.ok) {
+        renderErrors(["伺服器錯誤，請稍後再試"]);
+        return;
+      }
+      const WorkPostResponseData: WorkPost = await response.json();
       if (import.meta.env.VITE_MODE == "development") {
         console.log("前端收到 WorkPost 上傳 response", WorkPostResponseData);
       }
       updateProgress(100, "上傳完成");
       setTimeout(() => {
         hideProgressBar();
-        const errorDialog = document.getElementById(
-          "error-dialog"
-        ) as HTMLDialogElement;
-        const errorMessage = document.querySelector(
-          ".error-message"
-        ) as HTMLDivElement;
-        errorMessage.textContent = "貼文發布成功！請至探索頁面查看";
-        errorDialog.showModal();
-        errorDialog.classList.add("show");
-        errorDialog.addEventListener(
-          "click",
-          createDialogClickHandler(errorDialog)
-        );
+        renderErrors(["貼文發布成功！請至探索頁面查看"]);
       }, 800);
     } catch (error) {
       console.error("上傳失敗:", error);
+      renderErrors(["上傳過程發生錯誤，請稍後再試"]);
     } finally {
-      postWorkBtn.textContent = "發布";
-      postWorkBtn.disabled = false;
-      postWorkBtn.classList.remove("loading");
+      changeBtnToNormal(postWorkBtn);
     }
   });
 }
@@ -383,10 +263,12 @@ async function initBasicHelperProfile() {
   //渲染資料，並存入snapshot
   const response = await fetch(`${API_BASE_URL}/api/profile/helper`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    // headers: {
+    //   "Content-Type": "application/json",
+    //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    // },
   });
   if (!response.ok) throw new Error("Failed to fetch helper profile");
   const data = await response.json();
@@ -475,10 +357,12 @@ async function initBasicHelperProfile() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile/helper`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        // headers: {
+        //   "Content-Type": "application/json",
+        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // },
         body: JSON.stringify(payload),
       });
       if (import.meta.env.VITE_MODE == "development") {
@@ -533,10 +417,8 @@ async function initBasicHostProfile() {
   //渲染資料，並存入snapshot
   const response = await fetch(`${API_BASE_URL}/api/profile/host`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch host profile");
   const data = await response.json();
@@ -673,10 +555,8 @@ async function initBasicHostProfile() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile/host`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       if (import.meta.env.VITE_MODE == "development") {
@@ -729,7 +609,6 @@ function validateHelperProfile() {
 
   const email = getInputValue("helper-email-address");
   const username = getInputValue("helper-username");
-  // const password = getInputValue("host-password");
   const realname = getInputValue("helper-realname");
   const bio = getInputValue("self-description");
 
@@ -753,6 +632,10 @@ function validateHelperProfile() {
     errors.push("真實姓名長度必須在 2-15 字之間，不應包含數字或特殊符號");
   }
   if (!bio || bio.length < 20) errors.push("自我介紹為必填，且至少 20 字");
+  if (/<[a-z][\s\S]*>/i.test(bio)) {
+    errors.push("輸入文字不允許包含 HTML 標籤");
+  }
+
   if (import.meta.env.VITE_MODE == "development") {
     console.log("errors 內容", errors);
   }
@@ -764,7 +647,6 @@ function validateHostProfile() {
 
   const email = getInputValue("host-email-address");
   const username = getInputValue("host-username");
-  // const password = getInputValue("host-password");
   const realname = getInputValue("host-realname");
 
   const unitName = getInputValue("unit-name");
@@ -776,6 +658,13 @@ function validateHostProfile() {
   if (!address) errors.push("地址為必填");
   if (!city) errors.push("縣市為必填，且必須符合清單選項");
   if (!unitDescription) errors.push("單位介紹為必填");
+  if (
+    /<[a-z][\s\S]*>/i.test(unitDescription) ||
+    /<[a-z][\s\S]*>/i.test(address) ||
+    /<[a-z][\s\S]*>/i.test(unitName)
+  ) {
+    errors.push("輸入文字不允許包含 HTML 標籤");
+  }
 
   if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     errors.push("請輸入有效的電子郵件");
@@ -788,15 +677,6 @@ function validateHostProfile() {
   ) {
     errors.push("用戶名稱必須為 3-20 個字符，只能包含字母、數字和下底線");
   }
-  // if (
-  //   !password ||
-  //   password.length < 6 ||
-  //   !password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-  // ) {
-  //   errors.push(
-  //     "密碼至少需要 6 個字符，必須包含至少一個大寫字母、一個小寫字母和一個數字"
-  //   );
-  // }
   if (
     !realname ||
     realname.length < 2 ||
@@ -809,6 +689,71 @@ function validateHostProfile() {
     console.log("errors 內容", errors);
   }
   return { isValid: errors.length === 0, errors };
+}
+
+function validateWorkPostInput(postData: WorkPost): string[] {
+  const errors: string[] = [];
+  //必填
+  if (
+    !(
+      postData.startDate &&
+      postData.endDate &&
+      postData.recruitCount &&
+      postData.positionName &&
+      postData.positionCategories.length > 0 &&
+      postData.averageWorkHours &&
+      postData.minDuration &&
+      postData.accommodations.length > 0
+    )
+  ) {
+    errors.push("請輸入所有必填資訊");
+  }
+  // 時間
+  const start = new Date(postData.startDate);
+  const end = new Date(postData.endDate);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    errors.push("請輸入有效的日期");
+  }
+  if (end <= start) {
+    errors.push("結束時間必須大於開始時間");
+  }
+
+  // 字串長度與空值
+  if (!postData.positionName || postData.positionName.length < 2) {
+    errors.push("職位名稱至少需 2 個字");
+  }
+
+  // 數字範圍
+  if (postData.recruitCount < 1 || postData.recruitCount > 10) {
+    errors.push("招募人數需介於 1–10");
+  }
+
+  if (postData.averageWorkHours < 1 || postData.averageWorkHours > 6) {
+    errors.push("每日工作時數需介於 1–6 小時");
+  }
+
+  if (postData.minDuration < 1 || postData.minDuration > 90) {
+    errors.push("最短停留天數需介於 1–90 天");
+  }
+
+  return errors;
+}
+
+function validateFilesInput(files: File[]): string[] {
+  const errors: string[] = [];
+
+  if (files.length < 3 || files.length > 8) {
+    errors.push("請選擇至少 3 張，至多 8 張照片");
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  const hasInvalidType = files.some(
+    (file) => !allowedTypes.includes(file.type)
+  );
+  if (hasInvalidType) {
+    errors.push("僅支援 JPG、PNG、WEBP 圖片");
+  }
+  return errors;
 }
 
 function getInputValue(id: string) {
@@ -860,9 +805,74 @@ function showResponse(containerId: string, response: string) {
     container.replaceChildren();
     const p = document.createElement("p");
     p.style.color = "rgb(120, 180, 130)";
-    p.style.fontSize = "11px";
+    p.style.fontSize = "14px";
     p.style.marginBottom = "5px";
     p.textContent = response;
     container.appendChild(p);
   }
+}
+
+function renderErrors(errors: string[]) {
+  const errorDialog = document.getElementById(
+    "error-dialog"
+  ) as HTMLDialogElement;
+  const errorMessage = document.querySelector(
+    ".error-message"
+  ) as HTMLDivElement;
+  errorMessage.textContent = errors.join("\n");
+  errorDialog.showModal();
+  errorDialog.classList.add("show");
+  errorDialog.addEventListener("click", createDialogClickHandler(errorDialog));
+}
+
+// workpost 取值函式
+function getTextareaValue(id: string): string {
+  const el = document.getElementById(id) as HTMLTextAreaElement | null;
+  return el?.value.trim() || "";
+}
+
+// workpost 取值函式
+function getSelectNumberValue(id: string): number {
+  const el = document.getElementById(id);
+  if (el && el instanceof HTMLSelectElement) {
+    const value = el.value;
+    const num = parseInt(value, 10);
+    if (!isNaN(num)) {
+      return num;
+    }
+  }
+  return 0;
+}
+
+// workpost 取值函式
+function getSelectedOptionValues(selector: string): string[] {
+  const result: string[] = [];
+  const selectedButtons = document.querySelectorAll(`${selector}.selected`);
+
+  selectedButtons.forEach((btn) => {
+    const element = btn as HTMLElement;
+    const name = element.dataset.value;
+    if (name) {
+      result.push(name);
+    }
+  });
+  return result;
+}
+
+function sanitizeText(input: string): string {
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  }).trim();
+}
+
+function changeBtnToUploading(btn: HTMLButtonElement) {
+  btn.textContent = "上傳中";
+  btn.disabled = true;
+  btn.classList.add("loading");
+}
+function changeBtnToNormal(btn: HTMLButtonElement) {
+  btn.textContent = "發布";
+  btn.disabled = false;
+  btn.classList.remove("loading");
 }

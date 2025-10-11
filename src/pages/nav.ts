@@ -8,6 +8,7 @@ if (import.meta.env.VITE_MODE == "development") {
   console.log("Current Mode:", import.meta.env.VITE_MODE);
 }
 import { markAllNotificationsRead } from "../services/socket/notificationHandler.js";
+import { getCurrentUser } from "../utils/authMe.js";
 
 type SocketConfig = {
   token: string;
@@ -18,19 +19,13 @@ type SocketConfig = {
 initApp();
 
 async function initApp() {
-  let token = localStorage.getItem("token");
-  if (!token || token == "undefined") {
+  const userData = await getCurrentUser();
+  if (userData) {
+    renderMenu(userData.user.userType);
+    logOutUI();
+  } else {
     renderMenu(null);
     initAuthUI();
-  } else {
-    const userData = await getCurrentUser();
-    if (userData) {
-      renderMenu(userData.user.userType);
-      logOutUI();
-    } else {
-      renderMenu(null);
-      initAuthUI();
-    }
   }
 }
 const visitorMenu = document.getElementById("visitor-menu") as HTMLElement;
@@ -112,28 +107,6 @@ notificationBtn.addEventListener("click", async () => {
 // }
 
 function initAuthUI() {
-  // 角色按鈕樣式
-  // const signUpRoleButtons = document.querySelectorAll(".sign-up-role");
-  // const signInRoleButtons = document.querySelectorAll(".sign-in-role");
-  // [signUpRoleButtons, signInRoleButtons].forEach((btns) => {
-  //   btns.forEach((button) => {
-  //     button.addEventListener("click", () => {
-  //       btns.forEach((btn) => btn.classList.remove("selected"));
-  //       button.classList.add("selected");
-  //     });
-  //   });
-  // });
-
-  // 點擊註冊按鈕，跳出表單
-  // const toSignUpDiv = document.getElementById("sign-up-div") as HTMLDivElement;
-  // const signUpDialog = document.getElementById(
-  //   "sign-up-dialog"
-  // ) as HTMLDialogElement;
-  // toSignUpDiv.addEventListener("click", () => {
-  //   signUpDialog.showModal();
-  //   signUpDialog.classList.add("show");
-  // });
-
   // 點擊登入按鈕，跳出表單
   const toSignInDiv = document.getElementById("sign-in-div") as HTMLDivElement;
   const signInDialog = document.getElementById(
@@ -144,11 +117,7 @@ function initAuthUI() {
     signInDialog.classList.add("show");
   });
 
-  //點擊周邊區域，關閉登入或註冊表單
-  // signUpDialog.addEventListener(
-  //   "click",
-  //   createDialogClickHandler(signUpDialog)
-  // );
+  //點擊周邊區域，關閉登入表單
   signInDialog.addEventListener(
     "click",
     createDialogClickHandler(signInDialog)
@@ -190,6 +159,7 @@ function initAuthUI() {
       let response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: email.value,
           password: password.value,
@@ -215,7 +185,6 @@ function initAuthUI() {
       const signInData = await response.json();
 
       if (signInData.success) {
-        localStorage.setItem("token", signInData.token);
         localStorage.setItem("userId", signInData.user.id);
         const socketConfig: SocketConfig = {
           token: signInData.token,
@@ -237,29 +206,15 @@ function logOutUI() {
   //登出
   const logOutBtns = document.querySelectorAll(".log-out-btn");
   logOutBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      localStorage.removeItem("token");
+    btn.addEventListener("click", async () => {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
       localStorage.removeItem("userId");
       disconnectSocket();
       location.reload();
     });
   });
-}
-
-//用 token 取得當前使用者資訊
-async function getCurrentUser() {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  let data = await res.json();
-  if (import.meta.env.VITE_MODE == "development") {
-    console.log("userData", data);
-  }
-  if (data.success) {
-    return data;
-  } else {
-    return null;
-  }
 }

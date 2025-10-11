@@ -321,7 +321,7 @@ function showErrors(containerId: string, errors: string[]) {
       errors.forEach((error) => {
         const p = document.createElement("p");
         p.style.color = "rgb(200, 70, 40)";
-        p.style.fontSize = "11px";
+        p.style.fontSize = "14px";
         p.style.marginBottom = "5px";
         p.textContent = error;
         container.appendChild(p);
@@ -336,7 +336,7 @@ function showResponse(containerId: string, response: string) {
     container.replaceChildren();
     const p = document.createElement("p");
     p.style.color = "rgb(120, 180, 130)";
-    p.style.fontSize = "11px";
+    p.style.fontSize = "14px";
     p.style.marginBottom = "5px";
     p.textContent = response;
     container.appendChild(p);

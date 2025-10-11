@@ -11,7 +11,7 @@ interface NotificationData {
   title: string;
   message: string;
   helperProfileId: string;
-  timestamp: string;
+  createdAt: string;
   isRead?: boolean;
   data: NotificationUnitData;
 }
@@ -84,7 +84,7 @@ const showNotificationList = (notifications: NotificationData[]): void => {
     notifications.forEach((notification) => {
       const listItem = document.createElement("a");
       listItem.classList.add("notification-item");
-      listItem.href = `/workpost/${notification.data.workPostId}`;
+      listItem.href = `/workpost.html?id=${notification.data.workPostId}`;
       listItem.target = "_blank";
 
       const title = document.createElement("div");
@@ -98,8 +98,10 @@ const showNotificationList = (notifications: NotificationData[]): void => {
       listItem.appendChild(message);
 
       const timestamp = document.createElement("div");
-      timestamp.textContent = notification.timestamp;
-      message.classList.add("notification-timestamp");
+      timestamp.textContent = new Date(notification.createdAt)
+        .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+        .split("T")[0];
+      timestamp.classList.add("notification-timestamp");
       listItem.appendChild(timestamp);
 
       notificationContainer.appendChild(listItem);
@@ -114,7 +116,6 @@ const showNotificationList = (notifications: NotificationData[]): void => {
 const updateNotificationList = (notification: NotificationData): void => {
   const notificationContainer = document.getElementById("notification-list");
   if (!notificationContainer) return;
-
   const listItem = document.createElement("div");
   listItem.classList.add("notification-item");
 
@@ -129,8 +130,11 @@ const updateNotificationList = (notification: NotificationData): void => {
   listItem.appendChild(message);
 
   const timestamp = document.createElement("div");
-  timestamp.textContent = notification.timestamp;
-  message.classList.add("notification-timestamp");
+  let timestampString = new Date(notification.createdAt)
+    .toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" })
+    .split("T")[0];
+  timestamp.textContent = timestampString;
+  timestamp.classList.add("notification-timestamp");
   listItem.appendChild(timestamp);
 
   // notificationContainer.appendChild(listItem);
@@ -141,7 +145,6 @@ const updateNotificationList = (notification: NotificationData): void => {
 // 處理普通通知
 const handleGeneralNotification = (event: SocketEvent): void => {
   const notification = event.payload as NotificationData;
-  // emitSocketEvent("get_unread_count"); // 觸發未讀數量更新
   showBrowserNotification(notification);
   updateNotificationList(notification);
 };
