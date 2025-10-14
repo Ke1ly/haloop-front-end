@@ -287,7 +287,10 @@ body > main > section#work-list > section#posts > section.work-post {
 }
 
 body > main > section#work-list > section#posts > section.highlight {
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+  /* box-shadow: 0px 0px 8px rgba(213, 89, 6, 0.6); */
+  /* background-color: #dad4cf; */
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.7);
+  background-color: #e5e5e5;
 }
 
 body
@@ -345,6 +348,7 @@ body
     div {
       font-size: 14px;
       border-radius: 15px;
+      border: 2px solid white;
       padding: 3px 10px;
       margin-left: 5px;
       margin-top: 5px;

@@ -55,43 +55,28 @@
         <section id="summary-wrap">
           <section id="title">
             <div class="title-wrap">
-              <span class="position-name"></span> ・
-              <span class="unit-name"></span> ・
-              <span class="unit-city"></span> ・
+              <span class="position-name"></span>
+              <i class="fa-solid fa-location-dot"></i>
+              <span class="unit-name"></span>
+              <span class="unit-city"></span>
               <span class="unit-district"></span>
             </div>
-            <div class="button-wrap">
-              <!-- <div class="favorite-btn">
-                <i class="fa-regular fa-heart"></i> 收藏
-              </div> -->
-              <!-- <div class="share-btn">
-                <i class="fa-solid fa-arrow-up-from-bracket"></i> 分享
-              </div> -->
-            </div>
           </section>
-          <section id="summary-bottom-wrap">
-            <section class="summary-right">
-              <div class="summary-img">
-                <img class="summary-img-01" src="" alt="" />
-                <img class="summary-img-02" src="" alt="" />
-              </div>
-
-              <div class="environment-tags"></div>
-            </section>
-            <div class="availability-wrap">
-              <div class="available-dates"></div>
-              <div class="available-info">
-                <div class="min-duration"></div>
-                <div class="recruit-count"></div>
-              </div>
-              <!-- <div id="calendar"></div>
-              <div id="calendar-status"></div> -->
-            </div>
+          <section id="img-wrap">
+            <div class="summary-img"></div>
           </section>
-
-          <!-- <button id="apply-btn">立即申請</button> -->
         </section>
       </section>
+      <section id="availability">
+        <div id="availability-wrap">
+          <div class="available-dates"></div>
+          <div class="available-info">
+            <div class="min-duration"></div>
+            <div class="recruit-count"></div>
+          </div>
+        </div>
+      </section>
+
       <section id="description">
         <section id="work-description-wrap">
           <h5>志願工作</h5>
@@ -130,37 +115,48 @@
       </section>
 
       <section id="location">
-        <h5>位置</h5>
-        <div><span class="unit-address"></span></div>
-        <div id="google-map"></div>
+        <div id="location-wrap">
+          <h5>位置</h5>
+          <div><span class="unit-address"></span></div>
+          <div id="google-map"></div>
+        </div>
       </section>
       <section id="profile">
-        <h5>店家簡介</h5>
-        <section class="profile-wrap">
-          <div class="host-profile">
-            <div class="host-profile-left">
-              <div class="unit-avatar">
-                <img src="/img/user-default.png" alt="" />
+        <section id="profile-wrap">
+          <h5>店家簡介</h5>
+          <section class="profile-area">
+            <div class="host-profile">
+              <div class="host-profile-left">
+                <div class="unit-avatar">
+                  <img src="/img/user-default.png" alt="" />
+                </div>
+              </div>
+              <div class="host-profile-right">
+                <div class="profile-unit-name"></div>
+                <div><span class="last-login-at"></span></div>
+                <div><span class="joined-at"></span></div>
+              </div>
+              <div class="send-message-div">
+                <button class="send-message-btn">
+                  <i class="fa-regular fa-message"></i> 傳送訊息
+                </button>
               </div>
             </div>
-            <div class="host-profile-right">
-              <div class="profile-unit-name"></div>
-              <div><span class="last-login-at"></span></div>
-              <div><span class="joined-at"></span></div>
+            <!-- <div class="line"></div> -->
+            <div class="unit-profile">
+              <div class="unit-description"></div>
+              <div class="environments"></div>
             </div>
-          </div>
-          <div class="line"></div>
-          <div class="unit-profile">
-            <div class="unit-description"></div>
-            <div class="environments"></div>
-            <div class="send-message-btn">
-              <button><i class="fa-regular fa-message"></i> 傳送訊息</button>
-            </div>
-          </div>
+          </section>
         </section>
       </section>
     </main>
-
+    <template id="environments-tag-template">
+      <div class="environment-tag">
+        <i class="fa-solid fa-medal"></i>
+        <p></p>
+      </div>
+    </template>
     <dialog id="sign-in-dialog">
       <p>登入</p>
       <hr />

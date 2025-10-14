@@ -289,8 +289,10 @@ async function initWorkPosts(filter?: WorkPostFilterInput) {
     if (!userData) {
       let anonCount = parseInt(localStorage.getItem("anonMapLoads") || "0", 10);
       if (anonCount >= 5) {
-        document.getElementById("google-map")!.textContent =
-          "請登入以使用完整地圖服務";
+        const map = document.getElementById("google-map")!;
+        map.textContent = "地圖使用次數達上限，請登入以使用完整地圖服務";
+        map.style.padding = "15px 15px";
+        map.style.color = "brown";
         return;
       }
       anonCount++;

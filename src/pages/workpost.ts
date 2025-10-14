@@ -90,27 +90,35 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   positionName.textContent = postData.positionName;
 
   const unitName = document.querySelector(".unit-name") as HTMLDivElement;
-  unitName.textContent = postData.unit.unitName;
+  unitName.textContent = `${postData.unit.unitName}`;
 
   const unitCity = document.querySelector(".unit-city") as HTMLDivElement;
-  unitCity.textContent = postData.unit.city;
+  unitCity.textContent = `・${postData.unit.city}`;
 
   const unitDistrict = document.querySelector(
     ".unit-district"
   ) as HTMLDivElement;
   if (postData.unit.district) {
-    unitDistrict.textContent = postData.unit.district;
+    unitDistrict.textContent = `・${postData.unit.district}`;
   }
 
-  const summaryImg01 = document.querySelector(
-    ".summary-img-01"
-  ) as HTMLImageElement;
-  summaryImg01.src = postData.images[0];
-
-  const summaryImg02 = document.querySelector(
-    ".summary-img-02"
-  ) as HTMLImageElement;
-  summaryImg02.src = postData.images[1];
+  const summaryDiv = document.querySelector(
+    "div.summary-img"
+  ) as HTMLDivElement;
+  const imagesCount = postData.images.length;
+  if (imagesCount > 5) {
+    summaryDiv.classList.add("seven");
+  } else if (imagesCount == 5) {
+    summaryDiv.classList.add("five");
+  } else {
+    summaryDiv.classList.add("four");
+  }
+  postData.images.forEach((url, index) => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.classList.add(`summary-img-${String(index + 1).padStart(2, "0")}`);
+    summaryDiv.appendChild(img);
+  });
 
   const positionDescription = document.querySelector(
     ".position-description"
@@ -125,15 +133,19 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   const positionCategories = document.querySelector(
     ".position-categories"
   ) as HTMLDivElement;
-  if (postData.positionCategories) {
+  if (postData.positionCategories && postData.positionCategories.length > 0) {
     positionCategories.textContent = postData.positionCategories.join(" ・ ");
+  } else {
+    positionCategories.textContent = "無";
   }
 
   const positionRequirements = document.querySelector(
     ".position-requirements"
   ) as HTMLDivElement;
-  if (postData.requirements) {
+  if (postData.requirements && postData.requirements.length > 0) {
     positionRequirements.textContent = postData.requirements.join(" ・ ");
+  } else {
+    positionRequirements.textContent = "無";
   }
 
   const benefitDescription = document.querySelector(
@@ -144,20 +156,26 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   const accommodations = document.querySelector(
     ".benefit-accommodations"
   ) as HTMLDivElement;
-  if (postData.accommodations) {
+  if (postData.accommodations && postData.accommodations.length > 0) {
     accommodations.textContent = postData.accommodations.join(" ・ ");
+  } else {
+    accommodations.textContent = "無";
   }
 
   const meals = document.querySelector(".benefit-meals") as HTMLDivElement;
-  if (postData.meals) {
+  if (postData.meals && postData.meals.length > 0) {
     meals.textContent = postData.meals.join(" ・ ");
+  } else {
+    meals.textContent = "無";
   }
 
   const experiences = document.querySelector(
     ".benefit-experiences"
   ) as HTMLDivElement;
-  if (postData.experiences) {
+  if (postData.experiences && postData.experiences.length > 0) {
     experiences.textContent = postData.experiences.join(" ・ ");
+  } else {
+    experiences.textContent = "無";
   }
 
   const minDuration = document.querySelector(".min-duration") as HTMLDivElement;
@@ -192,8 +210,19 @@ async function renderWorkPost(postData: WorkPostForPageRender) {
   const environments = document.querySelector(
     ".environments"
   ) as HTMLDivElement;
-  if (postData.environments) {
-    environments.textContent = postData.environments.join(" ・ ");
+  if (postData.environments && postData.environments.length > 0) {
+    postData.environments.forEach((environmentTag) => {
+      const environmentTemplate = document.getElementById(
+        "environments-tag-template"
+      ) as HTMLTemplateElement;
+      const environmentClone = environmentTemplate.content.cloneNode(
+        true
+      ) as DocumentFragment;
+      const p = environmentClone.querySelector("p") as HTMLDivElement;
+      p.textContent = environmentTag;
+      environments.appendChild(environmentClone);
+    });
+    // environments.textContent = postData.environments.join(" ・ ");
   }
 
   const profileUnitName = document.querySelector(
