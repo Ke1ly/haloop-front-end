@@ -115,13 +115,13 @@ function renderRecommWorkPosts(recommendationData: WorkPostForCardRender[]) {
 }
 async function initRecommendationSection() {
   let userData = await getCurrentUser();
-  if (userData && userData.userType == "HELPER") {
+  if (userData && userData.user.userType == "HELPER") {
     initRecommendation();
 
     const helperName = document.querySelector(
       ".helper-name"
     ) as HTMLParagraphElement;
-    helperName.textContent = `Hello, ${userData.username}!`;
+    helperName.textContent = `Hello, ${userData.user.username}!`;
   }
 }
 initRecommendationSection();

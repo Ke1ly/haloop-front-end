@@ -297,12 +297,12 @@ body > main > section#profile > section#profile-wrap {
       div.environments {
         display: flex;
         flex-direction: row;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         div.environment-tag {
           font-size: 14px;
           display: flex;
           flex-direction: row;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
           align-items: center;
           padding: 10px 15px;
           box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
